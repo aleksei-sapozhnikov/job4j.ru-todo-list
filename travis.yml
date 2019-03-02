@@ -1,0 +1,17 @@
+language: java
+sudo: false
+
+# Code coverage https://codecov.io/
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+env:
+  global:
+    - CODECOV_TOKEN="b25766fb-bad5-494d-94b3-40f9b703a447"
+
+
+notifications:
+  email:
+    recipients:
+      -vermucht@gmail.com
+    on_success: never   # default: change
+    on_failure: change  # default: always
