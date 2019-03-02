@@ -12,6 +12,6 @@ env:
 notifications:
   email:
     recipients:
-      -vermucht@gmail.com
+      - vermucht@gmail.com
     on_success: never   # default: change
     on_failure: change  # default: always
