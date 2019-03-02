@@ -1,12 +1,19 @@
+# JDK version
 language: java
+jdk: openjdk11
+
+# No need in sudo
 sudo: false
+
+# Set environment variables for https://codecov.io/
+env:
+  global:
+    - CODECOV_TOKEN="b25766fb-bad5-494d-94b3-40f9b703a447"
 
 # Code coverage https://codecov.io/
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-env:
-  global:
-    - CODECOV_TOKEN="b25766fb-bad5-494d-94b3-40f9b703a447"
+
 
 
 notifications:

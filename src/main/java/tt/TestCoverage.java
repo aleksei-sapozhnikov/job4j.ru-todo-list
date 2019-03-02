@@ -1,3 +1,5 @@
+package tt;
+
 /**
  * Class to test coverage (will be deleted).
  *

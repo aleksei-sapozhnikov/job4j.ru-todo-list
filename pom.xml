@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.vermucht</groupId>
     <artifactId>todo-list</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <version>0.1</version>
     <name>todo-list</name>
 
@@ -152,6 +152,5 @@
                 </executions>
             </plugin>
         </plugins>
-
     </build>
 </project>
