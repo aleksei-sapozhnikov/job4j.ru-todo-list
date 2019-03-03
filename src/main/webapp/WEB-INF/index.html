@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>TODO-list</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <!-- Bootstrap CSS -->
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script crossorigin="anonymous"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(function () {
+
+            /**
+             * Function drawing table of existing items
+             *
+             * @param items Array of existing items to show in table.
+             */
+            function drawTableItems(items) {
+                let html = '';
+                html += '<table id="existing-items-table" class="table table-bordered">';
+                html += '<thead style="text-align:center;">';
+                html += '<tr>';
+                html += '<th>ID</th>';
+                html += '<th>Description</th>';
+                html += '<th>Created</th>';
+                html += '<th>Done</th>';
+                html += '</tr>';
+                html += '</thead>';
+                html += '<tbody style="text-align:center">';
+                items.forEach(function (item) {
+                    html += '<tr>';
+                    html += '<td>' + item.id + '</td>';
+                    html += '<td>' + item.description + '</td>';
+                    html += '<td>' + item.created + '</td>';
+                    html += '<td>' + item.done + '</td>';
+                    html += '</tr>';
+                });
+                html += '</tbody>';
+                html += "</table>";
+                return html;
+            }
+
+            function Item(id, description, created, done) {
+                this.id = id;
+                this.description = description;
+                this.created = created;
+                this.done = done;
+            }
+
+            /**
+             * Listener on button to create new task.
+             */
+            $("#add-task-submit").click(function () {
+                alert($("#add-task-description").val())
+            });
+
+            /*
+             * Table drawer stub - to see it's working.
+             */
+            let html = drawTableItems([
+                    new Item(1, 'one', 1, true),
+                    new Item(2, 'two', 2, false),
+                    new Item(3, 'three', 3, false),
+                    new Item(4, 'four', 4, true),
+                    new Item(5, 'five', 5, true),
+
+                ]
+            );
+            $("#existing-items-table").html(html);
+        });
+    </script>
+
+
+</head>
+<body>
+
+<!--
+  -- Header
+  -->
+<div align="center" class="container">
+    <h3>TODO-List</h3>
+</div>
+
+<!--
+  -- Add new task
+  -->
+<div class="container" style="margin-top: 20px">
+    <div class="input-group">
+        <textarea class="form-control" id="add-task-description" placeholder="Enter task description"></textarea>
+        <div class="input-group-prepend">
+            <button class="btn btn-primary" id="add-task-submit" type="button">Add task</button>
+        </div>
+    </div>
+</div>
+
+<!--
+  -- Show existing tasks
+  -->
+<div align="center" class="container" style="margin-top: 20px">
+    <div id="existing-items-table"></div>
+</div>
+
+</body>
+</html>

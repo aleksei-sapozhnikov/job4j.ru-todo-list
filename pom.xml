@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.vermucht</groupId>
     <artifactId>todo-list</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <version>0.1</version>
     <name>todo-list</name>
 
