@@ -31,25 +31,12 @@
              * Path to servlet returning existing items.
              * HTTP GET method.
              */
-        <<<<<<<
-            HEAD;
-            const servletGetExistingItems = context + "/items";
-        ======
-            =;
             const servletGetExistingItems = context + "items";
-        >>>>>>>
-            development
             /**
              * Path to servlet adding new item to storage.
              * HTTP POST method.
              */
-            << < < < < < HEAD;
-            const servletPostAddItem = context + '/items';
-        ======
-            =;
             const servletPostAddItem = context + 'items';
-        >>>>>>>
-            development;
 
             /* * * * * * * * * * * * * * * *
              * FUNCTIONS WORKING WITH ITEMS
@@ -63,64 +50,31 @@
             }
 
             function getItems() {
-            <<<<<<<
-                HEAD;
-                let result = '';
-            ======
-                =
-                    let;
-                result = [];
-            >>>>>>>
-                development;
+                let result = [];
                 $.ajax({
                     type: 'GET',
                     async: false,
                     datatype: "application/json",
                     url: servletGetExistingItems,
                     success: function (response) {
-                    <<<<<<<
-                        HEAD;
-                        let received = JSON.parse(response);
-                        if (received.error != null) {
+                        if (response.error != null) {
                             alert(response.error);
                         } else {
-                            result = received;
+                            result = JSON.parse(response);
                         }
                     }
                 });
+                result.sort(compareItems);
                 return result;
             }
 
-            function addItem(item) {
-            ======
-                =;
-                if (response.error != null) {
-                    alert(response.error);
-                } else {
-                    result = JSON.parse(response);
-                }
-            }
-        });
-        result.sort(compareItems);
-        return result;
-        }
-
-        function sendItem(item) {
-        >>>>>>>
-            development;
-            $.ajax({
-                type: 'POST',
-                async: false,
-                data: JSON.stringify(item),
-                url: servletPostAddItem,
-                success: function (response) {
-                <<<<<<<
-                    HEAD;
-                    let received = JSON.parse(response);
-                    if (received.error != null) {
-                        alert(response.error);
-                    ======
-                        =;
+            function sendItem(item) {
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    data: JSON.stringify(item),
+                    url: servletPostAddItem,
+                    success: function (response) {
                         if (response.error != null) {
                             alert(response.error);
                         } else {
@@ -134,12 +88,10 @@
                                 pageCurrentItems.push(stored);
                             }
                             pageCurrentItems.sort(compareItems);
-                        >>>>>>>
-                            development
                         }
                     }
                 });
-        }
+            }
 
             /**
              * Function drawing table of existing items
@@ -183,15 +135,7 @@
                 html += '<td>' + item.description + '</td>';
                 let date = new Date(item.created).toLocaleString();
                 html += `<td>${date}</td>`;
-            <<<<<<<
-                HEAD;
-                let checkboxId = `${item.id}-checkbox-done`;
-                html += `<td><input id="${checkboxId}" type="checkbox"${item.done ? ' checked' : ''}></td>`;
-            ======
-                =
-                    html += `<td><input name="${item.id}" type="checkbox" ${item.done ? 'checked' : ''}></td>`;
-            >>>>>>>
-                development;
+                html += `<td><input name="${item.id}" type="checkbox" ${item.done ? 'checked' : ''}></td>`;
                 html += '</tr>';
                 return html;
             }
@@ -203,9 +147,6 @@
                 return /^\s*$/.test(string);
             }
 
-        <<<<<<<
-        HEAD
-        === === =
             function compareItems(first, second) {
                 let result = 0;
                 if (first.done && !second.done) {
@@ -218,7 +159,6 @@
                 return result;
             }
 
-            >>> >>> > development;
             /* * * * * * * *
              * PAGE VARIABLES
              * * * * * * * */
@@ -241,16 +181,9 @@
              * Loads list of existing items from server
              * and saves it to page variable
              */
-        <<<<<<<
-        HEAD;
-            function loadExistingItemsFromServer() {
-            ======
-                =
-                    function getAllItemsFromServer() {
-                    >>>>>>>
-                        development;
-                        pageCurrentItems = getItems();
-                    };
+            function getAllItemsFromServer() {
+                pageCurrentItems = getItems();
+            }
 
             function setIsShowAllFlag(value) {
                 pageIsShowAllItems = value;
@@ -273,17 +206,13 @@
                 return $("#add-task-description").val();
             }
 
-            <<<<<<<
-                HEAD
-                === === =
-                    function findCheckedItem(changedElement) {
-                        let searchId = Number.parseInt(changedElement.name);
-                        return pageCurrentItems.find(function (element) {
-                            return element.id === searchId;
-                        });
-                    }
+            function findCheckedItem(changedElement) {
+                let searchId = Number.parseInt(changedElement.name);
+                return pageCurrentItems.find(function (element) {
+                    return element.id === searchId;
+                });
+            }
 
-                    >>> >>> > development;
             /* * * * * * * * * * * * * * *
              * LISTENERS ON PAGE ELEMENTS
              * * * * * * * * * * * * * * */
@@ -296,34 +225,19 @@
                 if (isWhiteSpaceOnly(description)) {
                     alert("Item description is empty!")
                 } else {
-                <<<<<<<
-                    HEAD;
-                    addItem(
+                    sendItem(
                         new Item(-1, description, created, false));
                 }
                 clearNewItemDescriptionElement();
-                loadExistingItemsFromServer();
-            ======
-                =
-                    sendItem(
-                        new Item(-1, description, created, false));
-            };
-                clearNewItemDescriptionElement();
-            >>>>>>>
-                development;
                 redrawItemsTable();
-            }
+            });
 
-        )
-        $("#add-task-description").keyup(function (event) {
+            $("#add-task-description").keyup(function (event) {
                 if (event.keyCode === 13 && !event.shiftKey) {
                     $("#add-task-submit").click();
                 }
             });
 
-        <<<<<<<
-        HEAD
-        === === =
             $("#existing-items-table").on('change', "input", function () {
                 let item = findCheckedItem(this);
                 if (item !== undefined) {
@@ -333,20 +247,12 @@
                 }
             });
 
-        >>>>>>>
-        development;
             /**
              * Listener on "Show all items" checkbox.
              */
             $("#showAll-checkbox").change(function () {
                 setIsShowAllFlag(this.checked);
-            <<<<<<<
-                HEAD;
-                redrawItemsTable(pageCurrentItems, pageIsShowAllItems)
-                === === =
-                    redrawItemsTable();
-            >>>>>>>
-                development
+                redrawItemsTable();
             });
 
             /* * * * * * * * * * * * * * *
@@ -354,7 +260,7 @@
              * * * * * * * * * * * * * * */
             redrawItemsTable();
 
-        })
+        });
     </script>
 </head>
 <body>
@@ -372,15 +278,10 @@
 <div class="container" style="margin-top: 20px">
     <div class="input-group">
         <textarea class="form-control" id="add-task-description"
-        <<<<<<< HEAD
-                  placeholder="Enter task description. <Enter> to submit. <Shift + Enter> to add new line"></textarea>
-        =======
-        placeholder="Enter task description.
-        <Enter> to submit."></textarea>
-            >>>>>>> development
-            <div class="input-group-prepend">
-                <button class="btn btn-primary" id="add-task-submit" type="button">Add task</button>
-            </div>
+                  placeholder="Enter task description. <Enter> to submit."></textarea>
+        <div class="input-group-prepend">
+            <button class="btn btn-primary" id="add-task-submit" type="button">Add task</button>
+        </div>
     </div>
 </div>
 
