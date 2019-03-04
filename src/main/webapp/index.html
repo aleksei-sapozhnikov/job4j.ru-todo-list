@@ -57,11 +57,10 @@
                     datatype: "application/json",
                     url: servletGetExistingItems,
                     success: function (response) {
-                        let received = JSON.parse(response);
-                        if (received.error != null) {
+                        if (response.error != null) {
                             alert(response.error);
                         } else {
-                            result = received;
+                            result = JSON.parse(response);
                         }
                     }
                 });
@@ -75,8 +74,7 @@
                     data: JSON.stringify(item),
                     url: servletPostAddItem,
                     success: function (response) {
-                        let received = JSON.parse(response);
-                        if (received.error != null) {
+                        if (response.error != null) {
                             alert(response.error);
                         }
                     }
@@ -185,6 +183,21 @@
                 return $("#add-task-description").val();
             }
 
+            function findCheckedItem(changedElement) {
+                let fullId = changedElement.id;
+                let id;
+                if (/^-?\d+-checkbox-done$/.test(fullId)) {
+                    let length = fullId.length;
+                    let tail = '-checkbox-done'.length;
+                    id = Number.parseInt(
+                        fullId.substring(0, length - tail));
+                }
+                let item = pageCurrentItems.find(function (element) {
+                    return element.id === id;
+                });
+                return item;
+            }
+
             /* * * * * * * * * * * * * * *
              * LISTENERS ON PAGE ELEMENTS
              * * * * * * * * * * * * * * */
@@ -211,12 +224,21 @@
                 }
             });
 
+            $("#existing-items-table").on('change', "input", function () {
+                let item = findCheckedItem(this);
+                if (item !== undefined) {
+                    item.done = this.checked;
+                    addItem(item);
+                    redrawItemsTable();
+                }
+            });
+
             /**
              * Listener on "Show all items" checkbox.
              */
             $("#showAll-checkbox").change(function () {
                 setIsShowAllFlag(this.checked);
-                redrawItemsTable(pageCurrentItems, pageIsShowAllItems)
+                redrawItemsTable();
             });
 
             /* * * * * * * * * * * * * * *
