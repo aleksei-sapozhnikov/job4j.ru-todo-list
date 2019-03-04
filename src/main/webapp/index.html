@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>TODO-list</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <!-- Bootstrap CSS -->
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script crossorigin="anonymous"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(function () {
+
+            /* * * * * * *
+             * CONSTANTS
+             * * * * * * */
+            /**
+             * Web application context.
+             */
+            const context = location.href;
+            /**
+             * Path to servlet returning existing items.
+             * HTTP GET method.
+             */
+            const servletGetExistingItems = context + "/items";
+            /**
+             * Path to servlet adding new item to storage.
+             * HTTP POST method.
+             */
+            const servletPostAddItem = context + '/items';
+
+            /* * * * * * * * * * * * * * * *
+             * FUNCTIONS WORKING WITH ITEMS
+             * * * * * * * * * * * * * * * */
+
+            function Item(id, description, created, done) {
+                this.id = id;
+                this.description = description;
+                this.created = created;
+                this.done = done;
+            }
+
+            function getItems() {
+                let result = '';
+                $.ajax({
+                    type: 'GET',
+                    async: false,
+                    datatype: "application/json",
+                    url: servletGetExistingItems,
+                    success: function (response) {
+                        let received = JSON.parse(response);
+                        if (received.error != null) {
+                            alert(response.error);
+                        } else {
+                            result = received;
+                        }
+                    }
+                });
+                return result;
+            }
+
+            function addItem(item) {
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    data: JSON.stringify(item),
+                    url: servletPostAddItem,
+                    success: function (response) {
+                        let received = JSON.parse(response);
+                        if (received.error != null) {
+                            alert(response.error);
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Function drawing table of existing items
+             *
+             * @param items Array of existing items to show in table.
+             * @param isShowAll Flag. True means show items which are done,
+             * False means not to show.
+             */
+            function constructItemsTable(items, isShowAll) {
+                let html = '';
+                html += '<table id="existing-items-table" class="table table-bordered">';
+                html += constructItemsTableHead();
+                html += '<tbody style="text-align:center">';
+                items.forEach(function (item) {
+                    if (isShowAll || !(item.done)) {
+                        html += constructItemsTableOneItemRow(item);
+                    }
+                });
+                html += '</tbody>';
+                html += "</table>";
+                return html;
+            }
+
+            function constructItemsTableHead() {
+                let html = '';
+                html += '<thead style="text-align:center;">';
+                html += '<tr>';
+                html += '<th>ID</th>';
+                html += '<th>Description</th>';
+                html += '<th>Created</th>';
+                html += '<th>Done</th>';
+                html += '</tr>';
+                html += '</thead>';
+                return html;
+            }
+
+            function constructItemsTableOneItemRow(item) {
+                let html = '';
+                html += '<tr>';
+                html += '<td>' + item.id + '</td>';
+                html += '<td>' + item.description + '</td>';
+                let date = new Date(item.created).toLocaleString();
+                html += `<td>${date}</td>`;
+                let checkboxId = `${item.id}-checkbox-done`;
+                html += `<td><input id="${checkboxId}" type="checkbox"${item.done ? ' checked' : ''}></td>`;
+                html += '</tr>';
+                return html;
+            }
+
+            /* * * * * * * * *
+             * UTILITY FUNCTIONS
+             * * * * * * * * */
+            function isWhiteSpaceOnly(string) {
+                return /^\s*$/.test(string);
+            }
+
+            /* * * * * * * *
+             * PAGE VARIABLES
+             * * * * * * * */
+            /**
+             * Flag. Defines what existing items to show in items table.
+             * True means show all items including ones which are done.
+             * False means show only items which are not done.
+             */
+            let pageIsShowAllItems = false;
+            /**
+             * Stores list of items loaded from server. To avoid ajax queries
+             * every time we toggle "Show all" checkbox.
+             */
+            let pageCurrentItems = getItems();
+
+            /* * * * * * * * * * * * * * * * * * * * * * * * *
+             * FUNCTIONS CHANGING PAGE VARIABLES AND ELEMENTS
+             * * * * * * * * * * * * * * * * * * * * * * * * */
+            /**
+             * Loads list of existing items from server
+             * and saves it to page variable
+             */
+            function loadExistingItemsFromServer() {
+                pageCurrentItems = getItems();
+            }
+
+            function setIsShowAllFlag(value) {
+                pageIsShowAllItems = value;
+            }
+
+            /**
+             * Redraws table of existing items.
+             */
+            function redrawItemsTable() {
+                $("#existing-items-table").html(
+                    constructItemsTable(pageCurrentItems, pageIsShowAllItems)
+                );
+            }
+
+            function clearNewItemDescriptionElement() {
+                $("#add-task-description").val('');
+            }
+
+            function getNewItemDescription() {
+                return $("#add-task-description").val();
+            }
+
+            /* * * * * * * * * * * * * * *
+             * LISTENERS ON PAGE ELEMENTS
+             * * * * * * * * * * * * * * */
+            /**
+             * Listener on button to create new task.
+             */
+            $("#add-task-submit").click(function () {
+                let description = getNewItemDescription();
+                let created = new Date().getTime();
+                if (isWhiteSpaceOnly(description)) {
+                    alert("Item description is empty!")
+                } else {
+                    addItem(
+                        new Item(-1, description, created, false));
+                }
+                clearNewItemDescriptionElement();
+                loadExistingItemsFromServer();
+                redrawItemsTable();
+            });
+
+            $("#add-task-description").keyup(function (event) {
+                if (event.keyCode === 13 && !event.shiftKey) {
+                    $("#add-task-submit").click();
+                }
+            });
+
+            /**
+             * Listener on "Show all items" checkbox.
+             */
+            $("#showAll-checkbox").change(function () {
+                setIsShowAllFlag(this.checked);
+                redrawItemsTable(pageCurrentItems, pageIsShowAllItems)
+            });
+
+            /* * * * * * * * * * * * * * *
+             * OPERATIONS AFTER PAGE LOAD
+             * * * * * * * * * * * * * * */
+            redrawItemsTable();
+
+        });
+    </script>
+</head>
+<body>
+
+<!--
+  -- Header
+  -->
+<div align="center" class="container">
+    <h3>TODO-List</h3>
+</div>
+
+<!--
+  -- Add new task
+  -->
+<div class="container" style="margin-top: 20px">
+    <div class="input-group">
+        <textarea class="form-control" id="add-task-description"
+                  placeholder="Enter task description. <Enter> to submit. <Shift + Enter> to add new line"></textarea>
+        <div class="input-group-prepend">
+            <button class="btn btn-primary" id="add-task-submit" type="button">Add task</button>
+        </div>
+    </div>
+</div>
+
+<!--
+  -- Show existing tasks
+  -->
+<div align="center" class="container" style="margin-top: 20px">
+    <div class="row float-right">
+        <div class="custom-control custom-checkbox">
+            <input class="custom-control-input" id="showAll-checkbox" type="checkbox">
+            <label class="custom-control-label" for="showAll-checkbox">Show all</label>
+        </div>
+    </div>
+    <div id="existing-items-table"></div>
+</div>
+
+</body>
+</html>
