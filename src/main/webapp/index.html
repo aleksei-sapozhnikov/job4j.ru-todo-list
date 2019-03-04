@@ -19,12 +19,35 @@
 
     <script>
         $(function () {
-            const context = location.href;
-            const servletGetItems = context + "/items";
 
-            /* * * * * * * * * * *
-             * WORKING WITH ITEMS
-             * * * * * * * * * * */
+            /* * * * * * *
+             * CONSTANTS
+             * * * * * * */
+            /**
+             * Web application context.
+             */
+            const context = location.href;
+            /**
+             * Path to servlet returning existing items.
+             * HTTP GET method.
+             */
+            const servletGetExistingItems = context + "/items";
+            /**
+             * Path to servlet adding new item to storage.
+             * HTTP POST method.
+             */
+            const servletPostAddItem = context + '/items';
+
+            /* * * * * * * * * * * * * * * *
+             * FUNCTIONS WORKING WITH ITEMS
+             * * * * * * * * * * * * * * * */
+
+            function Item(id, description, created, done) {
+                this.id = id;
+                this.description = description;
+                this.created = created;
+                this.done = done;
+            }
 
             function getItems() {
                 let result = '';
@@ -32,7 +55,7 @@
                     type: 'GET',
                     async: false,
                     datatype: "application/json",
-                    url: servletGetItems,
+                    url: servletGetExistingItems,
                     success: function (response) {
                         let received = JSON.parse(response);
                         if (received.error != null) {
@@ -45,29 +68,36 @@
                 return result;
             }
 
-            function redrawTableItems(items, showAll) {
-                $("#existing-items-table").html(
-                    drawTableItems(items, showAll)
-                );
+            function addItem(item) {
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    data: JSON.stringify(item),
+                    url: servletPostAddItem,
+                    success: function (response) {
+                        let received = JSON.parse(response);
+                        if (received.error != null) {
+                            alert(response.error);
+                        }
+                    }
+                });
             }
 
             /**
              * Function drawing table of existing items
              *
              * @param items Array of existing items to show in table.
-             * @param showAll Flag. True means show items which are done,
+             * @param isShowAll Flag. True means show items which are done,
              * False means not to show.
              */
-            function drawTableItems(items, showAll) {
+            function constructItemsTable(items, isShowAll) {
                 let html = '';
                 html += '<table id="existing-items-table" class="table table-bordered">';
-                html += '<thead style="text-align:center;">';
-                html += drawTableItemsHead();
-                html += '</thead>';
+                html += constructItemsTableHead();
                 html += '<tbody style="text-align:center">';
                 items.forEach(function (item) {
-                    if (showAll || !(item.done)) {
-                        html += drawTableItemsItemRow(item);
+                    if (isShowAll || !(item.done)) {
+                        html += constructItemsTableOneItemRow(item);
                     }
                 });
                 html += '</tbody>';
@@ -75,68 +105,111 @@
                 return html;
             }
 
-            function drawTableItemsHead() {
+            function constructItemsTableHead() {
                 let html = '';
+                html += '<thead style="text-align:center;">';
                 html += '<tr>';
                 html += '<th>ID</th>';
                 html += '<th>Description</th>';
                 html += '<th>Created</th>';
                 html += '<th>Done</th>';
                 html += '</tr>';
+                html += '</thead>';
                 return html;
             }
 
-            function drawTableItemsItemRow(item) {
+            function constructItemsTableOneItemRow(item) {
                 let html = '';
                 html += '<tr>';
                 html += '<td>' + item.id + '</td>';
                 html += '<td>' + item.description + '</td>';
-                html += '<td>' + new Date(item.created).toLocaleString() + '</td>';
-                let checkboxId = item.id + '-done-checkbox';
-                html += '<td>'
-                    + '<input id="' + checkboxId + '" '
-                    + 'type="checkbox"'
-                    + (item.done ? ' checked' : '')
-                    + '>'
-                    + '</td>';
+                let date = new Date(item.created).toLocaleString();
+                html += `<td>${date}</td>`;
+                let checkboxId = `${item.id}-checkbox-done`;
+                html += `<td><input id="${checkboxId}" type="checkbox"${item.done ? ' checked' : ''}></td>`;
                 html += '</tr>';
                 return html;
             }
 
-            /* * * * * *
-             * LISTENERS
-             * * * * * */
+            /* * * * * * * *
+             * PAGE VARIABLES
+             * * * * * * * */
+            /**
+             * Flag. Defines what existing items to show in items table.
+             * True means show all items including ones which are done.
+             * False means show only items which are not done.
+             */
+            let pageIsShowAllItems = false;
+            /**
+             * Stores list of items loaded from server. To avoid ajax queries
+             * every time we toggle "Show all" checkbox.
+             */
+            let pageCurrentItems = getItems();
 
+            /* * * * * * * * * * * * * * * * * * * * * * * * *
+             * FUNCTIONS CHANGING PAGE VARIABLES AND ELEMENTS
+             * * * * * * * * * * * * * * * * * * * * * * * * */
+            /**
+             * Loads list of existing items from server
+             * and saves it to page variable
+             */
+            function loadExistingItemsFromServer() {
+                pageCurrentItems = getItems();
+            }
+
+            function setIsShowAllFlag(value) {
+                pageIsShowAllItems = value;
+            }
+
+            /**
+             * Redraws table of existing items.
+             */
+            function redrawItemsTable() {
+                $("#existing-items-table").html(
+                    constructItemsTable(pageCurrentItems, pageIsShowAllItems)
+                );
+            }
+
+            function clearNewItemDescriptionElement() {
+                $("#add-task-description").val('');
+            }
+
+            function getNewItemDescription() {
+                return $("#add-task-description").val();
+            }
+
+            /* * * * * * * * * * * * * * *
+             * LISTENERS ON PAGE ELEMENTS
+             * * * * * * * * * * * * * * */
             /**
              * Listener on button to create new task.
              */
             $("#add-task-submit").click(function () {
-                alert($("#add-task-description").val())
+                let description = getNewItemDescription();
+                let created = new Date().getTime();
+                addItem(
+                    new Item(-1, description, created, false)
+                );
+                clearNewItemDescriptionElement();
+                loadExistingItemsFromServer();
+                redrawItemsTable();
             });
 
+            /**
+             * Listener on "Show all items" checkbox.
+             */
             $("#showAll-checkbox").change(function () {
-                pageShowAllItems = this.checked;
-                redrawTableItems(pageCurrentItems, pageShowAllItems)
+                setIsShowAllFlag(this.checked);
+                redrawItemsTable(pageCurrentItems, pageIsShowAllItems)
             });
 
-
-            /* * * * * * *
-            PAGE VARIABLES
-            * * * * * *  */
-
-            let pageShowAllItems = false;
-            let pageCurrentItems = getItems();
-
-            /* * * * * * * * *
-             * AFTER PAGE LOAD
-             * * * * * * * * */
-
-            redrawTableItems(pageCurrentItems, pageShowAllItems);
+            /* * * * * * * * * * * * * * *
+             * OPERATIONS AFTER PAGE LOAD
+             * * * * * * * * * * * * * * */
+            redrawItemsTable();
 
         });
     </script>
-
-
 </head>
 <body>
 
@@ -169,8 +242,6 @@
             <label class="custom-control-label" for="showAll-checkbox">Show all</label>
         </div>
     </div>
-
-
     <div id="existing-items-table"></div>
 </div>
 

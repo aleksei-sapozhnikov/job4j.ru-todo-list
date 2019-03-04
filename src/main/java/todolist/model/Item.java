@@ -27,4 +27,9 @@ public class Item {
         this.created = created;
         this.done = done;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Item{id=%d, description='%s', created=%d, done=%s}", id, description, created, done);
+    }
 }
