@@ -19,6 +19,31 @@
 
     <script>
         $(function () {
+            const context = location.href;
+            const servletGetItems = context + "/items";
+
+            /* * * * * * * * * * *
+             * WORKING WITH ITEMS
+             * * * * * * * * * * */
+
+            function getItems() {
+                let result = '';
+                $.ajax({
+                    type: 'GET',
+                    async: false,
+                    datatype: "application/json",
+                    url: servletGetItems,
+                    success: function (response) {
+                        let received = JSON.parse(response);
+                        if (received.error != null) {
+                            alert(response.error);
+                        } else {
+                            result = received;
+                        }
+                    }
+                });
+                return result;
+            }
 
             /**
              * Function drawing table of existing items
@@ -41,8 +66,12 @@
                     html += '<tr>';
                     html += '<td>' + item.id + '</td>';
                     html += '<td>' + item.description + '</td>';
-                    html += '<td>' + item.created + '</td>';
-                    html += '<td>' + item.done + '</td>';
+                    html += '<td>' + new Date(item.created).toLocaleString() + '</td>';
+                    html += '<td>'
+                        + '<input type="checkbox"'
+                        + (item.done ? ' checked' : '')
+                        + '/>';
+                    html += '</td>';
                     html += '</tr>';
                 });
                 html += '</tbody>';
@@ -50,12 +79,9 @@
                 return html;
             }
 
-            function Item(id, description, created, done) {
-                this.id = id;
-                this.description = description;
-                this.created = created;
-                this.done = done;
-            }
+            /* * * * * *
+             * LISTENERS
+             * * * * * */
 
             /**
              * Listener on button to create new task.
@@ -64,19 +90,13 @@
                 alert($("#add-task-description").val())
             });
 
-            /*
-             * Table drawer stub - to see it's working.
-             */
-            let html = drawTableItems([
-                    new Item(1, 'one', 1, true),
-                    new Item(2, 'two', 2, false),
-                    new Item(3, 'three', 3, false),
-                    new Item(4, 'four', 4, true),
-                    new Item(5, 'five', 5, true),
+            /* * * *
+             * MAIN
+             * * * */
 
-                ]
+            $("#existing-items-table").html(
+                drawTableItems(getItems())
             );
-            $("#existing-items-table").html(html);
         });
     </script>
 
