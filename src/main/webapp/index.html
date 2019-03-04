@@ -131,6 +131,13 @@
                 return html;
             }
 
+            /* * * * * * * * *
+             * UTILITY FUNCTIONS
+             * * * * * * * * */
+            function isWhiteSpaceOnly(string) {
+                return /^\s+$/.test(string);
+            }
+
             /* * * * * * * *
              * PAGE VARIABLES
              * * * * * * * */
@@ -187,12 +194,21 @@
             $("#add-task-submit").click(function () {
                 let description = getNewItemDescription();
                 let created = new Date().getTime();
-                addItem(
-                    new Item(-1, description, created, false)
-                );
+                if (isWhiteSpaceOnly(description)) {
+                    alert("Item description is empty!")
+                } else {
+                    addItem(
+                        new Item(-1, description, created, false));
+                }
                 clearNewItemDescriptionElement();
                 loadExistingItemsFromServer();
                 redrawItemsTable();
+            });
+
+            $("#add-task-description").keyup(function (event) {
+                if (event.keyCode === 13 && !event.shiftKey) {
+                    $("#add-task-submit").click();
+                }
             });
 
             /**
@@ -225,7 +241,8 @@
   -->
 <div class="container" style="margin-top: 20px">
     <div class="input-group">
-        <textarea class="form-control" id="add-task-description" placeholder="Enter task description"></textarea>
+        <textarea class="form-control" id="add-task-description"
+                  placeholder="Enter task description. <Enter> to submit. <Shift + Enter> to add new line"></textarea>
         <div class="input-group-prepend">
             <button class="btn btn-primary" id="add-task-submit" type="button">Add task</button>
         </div>
