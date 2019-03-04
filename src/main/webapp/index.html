@@ -45,37 +45,61 @@
                 return result;
             }
 
+            function redrawTableItems(items, showAll) {
+                $("#existing-items-table").html(
+                    drawTableItems(items, showAll)
+                );
+            }
+
             /**
              * Function drawing table of existing items
              *
              * @param items Array of existing items to show in table.
+             * @param showAll Flag. True means show items which are done,
+             * False means not to show.
              */
-            function drawTableItems(items) {
+            function drawTableItems(items, showAll) {
                 let html = '';
                 html += '<table id="existing-items-table" class="table table-bordered">';
                 html += '<thead style="text-align:center;">';
+                html += drawTableItemsHead();
+                html += '</thead>';
+                html += '<tbody style="text-align:center">';
+                items.forEach(function (item) {
+                    if (showAll || !(item.done)) {
+                        html += drawTableItemsItemRow(item);
+                    }
+                });
+                html += '</tbody>';
+                html += "</table>";
+                return html;
+            }
+
+            function drawTableItemsHead() {
+                let html = '';
                 html += '<tr>';
                 html += '<th>ID</th>';
                 html += '<th>Description</th>';
                 html += '<th>Created</th>';
                 html += '<th>Done</th>';
                 html += '</tr>';
-                html += '</thead>';
-                html += '<tbody style="text-align:center">';
-                items.forEach(function (item) {
-                    html += '<tr>';
-                    html += '<td>' + item.id + '</td>';
-                    html += '<td>' + item.description + '</td>';
-                    html += '<td>' + new Date(item.created).toLocaleString() + '</td>';
-                    html += '<td>'
-                        + '<input type="checkbox"'
-                        + (item.done ? ' checked' : '')
-                        + '/>';
-                    html += '</td>';
-                    html += '</tr>';
-                });
-                html += '</tbody>';
-                html += "</table>";
+                return html;
+            }
+
+            function drawTableItemsItemRow(item) {
+                let html = '';
+                html += '<tr>';
+                html += '<td>' + item.id + '</td>';
+                html += '<td>' + item.description + '</td>';
+                html += '<td>' + new Date(item.created).toLocaleString() + '</td>';
+                let checkboxId = item.id + '-done-checkbox';
+                html += '<td>'
+                    + '<input id="' + checkboxId + '" '
+                    + 'type="checkbox"'
+                    + (item.done ? ' checked' : '')
+                    + '>'
+                    + '</td>';
+                html += '</tr>';
                 return html;
             }
 
@@ -90,13 +114,25 @@
                 alert($("#add-task-description").val())
             });
 
-            /* * * *
-             * MAIN
-             * * * */
+            $("#showAll-checkbox").change(function () {
+                pageShowAllItems = this.checked;
+                redrawTableItems(pageCurrentItems, pageShowAllItems)
+            });
 
-            $("#existing-items-table").html(
-                drawTableItems(getItems())
-            );
+
+            /* * * * * * *
+            PAGE VARIABLES
+            * * * * * *  */
+
+            let pageShowAllItems = false;
+            let pageCurrentItems = getItems();
+
+            /* * * * * * * * *
+             * AFTER PAGE LOAD
+             * * * * * * * * */
+
+            redrawTableItems(pageCurrentItems, pageShowAllItems);
+
         });
     </script>
 
@@ -127,6 +163,14 @@
   -- Show existing tasks
   -->
 <div align="center" class="container" style="margin-top: 20px">
+    <div class="row float-right">
+        <div class="custom-control custom-checkbox">
+            <input class="custom-control-input" id="showAll-checkbox" type="checkbox">
+            <label class="custom-control-label" for="showAll-checkbox">Show all</label>
+        </div>
+    </div>
+
+
     <div id="existing-items-table"></div>
 </div>
 
