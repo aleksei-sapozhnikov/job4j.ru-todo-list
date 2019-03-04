@@ -35,5 +35,6 @@ public class ItemsServlet extends HttpServlet {
             item = new Gson().fromJson(reader, Item.class);
         }
         this.storage.add(item);
+        resp.setStatus(201);
     }
 }
