@@ -32,7 +32,6 @@ public class ItemsServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Item item;
         try (var reader = req.getReader()) {
-            System.out.println("Trying to read object");
             item = new Gson().fromJson(reader, Item.class);
         }
         this.storage.add(item);
