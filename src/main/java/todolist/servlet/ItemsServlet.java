@@ -24,6 +24,7 @@ public class ItemsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try (var writer = resp.getWriter()) {
+            System.out.println(new Gson().toJson(this.storage));
             new Gson().toJson(this.storage, writer);
         }
     }

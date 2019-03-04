@@ -13,4 +13,22 @@
         <url-pattern>/items</url-pattern>
     </servlet-mapping>
 
+    <filter>
+        <filter-name>CharacterEncodingUtf8Filter</filter-name>
+        <filter-class>todolist.servlet.CharacterEncodingUtf8Filter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CharacterEncodingUtf8Filter</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>ContentTypeTextHtmlFilter</filter-name>
+        <filter-class>todolist.servlet.ContentTypeTextHtmlFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ContentTypeTextHtmlFilter</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+
 </web-app>
