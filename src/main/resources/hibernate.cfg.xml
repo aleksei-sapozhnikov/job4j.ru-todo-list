@@ -4,7 +4,7 @@
 <hibernate-configuration>
     <session-factory>
         <!--suppress HibernateConfigDomInspection -->
-        <property name="hibernate.dialect">${hibernate.sql.dialect}</property>
+        <property name="hibernate.dialect">${db.hibernate.sql.dialect}</property>
         <!--suppress HibernateConfigDomInspection -->
         <property name="hibernate.connection.driver_class">${db.driver}</property>
         <property name="hibernate.connection.url">${db.url}</property>
@@ -12,7 +12,7 @@
         <property name="hibernate.connection.password">${db.password}</property>
 
         <!-- List of XML mapping files -->
-        <!--<mapping resource="Employee.hbm.xml"/>-->
+        <mapping resource="todolist/model/Item.hbm.xml"/>
 
     </session-factory>
 </hibernate-configuration>

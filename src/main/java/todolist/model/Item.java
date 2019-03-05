@@ -23,11 +23,7 @@ public class Item implements Comparable<Item> {
     private long created;
     private boolean done;
 
-    public Item(int id, String description, long created, boolean done) {
-        this.id = id;
-        this.description = description;
-        this.created = created;
-        this.done = done;
+    public Item() {
     }
 
     @Override
@@ -64,6 +60,41 @@ public class Item implements Comparable<Item> {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    /**
+     * Returns description.
+     *
+     * @return Value of description field.
+     */
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * Returns created.
+     *
+     * @return Value of created field.
+     */
+    public long getCreated() {
+        return this.created;
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
+    }
+
+    /**
+     * Returns done.
+     *
+     * @return Value of done field.
+     */
+    public boolean isDone() {
+        return this.done;
     }
 
     public void setDone(boolean done) {

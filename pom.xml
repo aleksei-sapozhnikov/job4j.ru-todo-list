@@ -19,19 +19,21 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <db.url>jdbc:postgresql://127.0.0.1:5432/test</db.url>
+                <db.url>jdbc:postgresql://127.0.0.1:5432/test_db</db.url>
                 <db.username>tester</db.username>
                 <db.password>password</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
+                <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
         </profile>
         <profile>
             <id>production</id>
             <properties>
-                <db.url>jdbc:postgresql://127.0.0.1:5432/production</db.url>
+                <db.url>jdbc:postgresql://127.0.0.1:5432/product_db</db.url>
                 <db.username>producer</db.username>
                 <db.password>password</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
+                <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
         </profile>
     </profiles>
@@ -115,6 +117,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
