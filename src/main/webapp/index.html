@@ -67,7 +67,7 @@
                 return result;
             }
 
-            function addItem(item) {
+            function sendItem(item) {
                 $.ajax({
                     type: 'POST',
                     async: false,
@@ -123,8 +123,7 @@
                 html += '<td>' + item.description + '</td>';
                 let date = new Date(item.created).toLocaleString();
                 html += `<td>${date}</td>`;
-                let checkboxId = `${item.id}-checkbox-done`;
-                html += `<td><input id="${checkboxId}" type="checkbox"${item.done ? ' checked' : ''}></td>`;
+                html += `<td><input name="${item.id}" type="checkbox" ${item.done ? 'checked' : ''}></td>`;
                 html += '</tr>';
                 return html;
             }
@@ -184,18 +183,10 @@
             }
 
             function findCheckedItem(changedElement) {
-                let fullId = changedElement.id;
-                let id;
-                if (/^-?\d+-checkbox-done$/.test(fullId)) {
-                    let length = fullId.length;
-                    let tail = '-checkbox-done'.length;
-                    id = Number.parseInt(
-                        fullId.substring(0, length - tail));
-                }
-                let item = pageCurrentItems.find(function (element) {
-                    return element.id === id;
+                let searchId = Number.parseInt(changedElement.name);
+                return pageCurrentItems.find(function (element) {
+                    return element.id === searchId;
                 });
-                return item;
             }
 
             /* * * * * * * * * * * * * * *
@@ -210,7 +201,7 @@
                 if (isWhiteSpaceOnly(description)) {
                     alert("Item description is empty!")
                 } else {
-                    addItem(
+                    sendItem(
                         new Item(-1, description, created, false));
                 }
                 clearNewItemDescriptionElement();
@@ -228,7 +219,7 @@
                 let item = findCheckedItem(this);
                 if (item !== undefined) {
                     item.done = this.checked;
-                    addItem(item);
+                    sendItem(item);
                     redrawItemsTable();
                 }
             });
@@ -264,7 +255,7 @@
 <div class="container" style="margin-top: 20px">
     <div class="input-group">
         <textarea class="form-control" id="add-task-description"
-                  placeholder="Enter task description. <Enter> to submit. <Shift + Enter> to add new line"></textarea>
+                  placeholder="Enter task description. <Enter> to submit."></textarea>
         <div class="input-group-prepend">
             <button class="btn btn-primary" id="add-task-submit" type="button">Add task</button>
         </div>
