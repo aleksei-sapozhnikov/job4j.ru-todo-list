@@ -29,9 +29,9 @@
         <profile>
             <id>production</id>
             <properties>
-                <db.url>jdbc:postgresql://127.0.0.1:5432/product_db</db.url>
-                <db.username>producer</db.username>
-                <db.password>password</db.password>
+                <db.url>${env.JDBC_DATABASE_URL}</db.url>
+                <db.username>${JDBC_DATABASE_USERNAME}</db.username>
+                <db.password>${JDBC_DATABASE_PASSWORD}</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
                 <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
