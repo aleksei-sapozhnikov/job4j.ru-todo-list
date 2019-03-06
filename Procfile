@@ -2,4 +2,4 @@
 web: java $JAVA_OPTS -jar target/dependency/webapp-runner.jar --port $PORT target/*.war
 
 # To run liquibase, using maven wrapper
-release: ./mvnw liquibase:update
+release: sh ./mvnw liquibase:update
