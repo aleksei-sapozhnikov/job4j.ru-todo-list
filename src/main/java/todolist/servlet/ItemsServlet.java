@@ -30,11 +30,14 @@ public class ItemsServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Item item;
-        try (var reader = req.getReader()) {
-            item = new Gson().fromJson(reader, Item.class);
+        try (var reader = req.getReader();
+             var writer = resp.getWriter()
+        ) {
+            var gson = new Gson();
+            var item = gson.fromJson(reader, Item.class);
+            item = this.storage.merge(item);
+            gson.toJson(item, writer);
         }
-        this.storage.merge(item);
         resp.setStatus(RESP_CODE_CREATED);
     }
 }
