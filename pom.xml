@@ -24,11 +24,11 @@
             </activation>
             <properties>
                 <!--suppress UnresolvedMavenProperty -->
-                <db.url>${env.JDBC_DATABASE_URL}</db.url>
+                <db.url>${database.jdbcUrl}</db.url>
                 <!--suppress UnresolvedMavenProperty -->
-                <db.username>${env.JDBC_DATABASE_USERNAME}</db.username>
+                <db.username>${database.username}</db.username>
                 <!--suppress UnresolvedMavenProperty -->
-                <db.password>${env.JDBC_DATABASE_PASSWORD}</db.password>
+                <db.password>${database.password}</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
                 <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
@@ -124,6 +124,16 @@
             <version>2.11.0</version>
         </dependency>
 
+        <!-- Library to parse JDBC_DATABASE_URL into Maven profile properties -->
+        <!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.5.6</version>
+            <type>pom</type>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -215,6 +225,36 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scripts>
+                        <script>
+                            <![CDATA[
+                            URI dbUri = new URI(System.getenv("DATABASE_URL"));
+                            String username = dbUri.getUserInfo().split(":")[0];
+                            String password = dbUri.getUserInfo().split(":")[1];
+                            int port = dbUri.getPort();
+                            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
+
+                            project.properties['database.jdbcUrl']=dbUrl
+                            project.properties['database.username']=username
+                            project.properties['database.password']=password
+                            ]]>
+                        </script>
+                    </scripts>
+                </configuration>
             </plugin>
         </plugins>
     </build>
