@@ -25,6 +25,10 @@
             <properties>
                 <!--suppress UnresolvedMavenProperty -->
                 <db.url>${env.JDBC_DATABASE_URL}</db.url>
+                <!--suppress UnresolvedMavenProperty -->
+                <db.username>${env.JDBC_DATABASE_USERNAME}</db.username>
+                <!--suppress UnresolvedMavenProperty -->
+                <db.password>${env.JDBC_DATABASE_PASSWORD}</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
                 <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
