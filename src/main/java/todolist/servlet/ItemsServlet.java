@@ -2,15 +2,13 @@ package todolist.servlet;
 
 import com.google.gson.Gson;
 import todolist.model.Item;
+import todolist.persistence.ItemDatabaseStorage;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.NavigableSet;
-import java.util.Random;
-import java.util.TreeSet;
 
 /**
  * Servlet working with items.
@@ -21,13 +19,12 @@ import java.util.TreeSet;
  */
 public class ItemsServlet extends HttpServlet {
     private static final int RESP_CODE_CREATED = 201;
-    private final NavigableSet<Item> storage = new TreeSet<>();
-    private final Random random = new Random();
+    private final ItemDatabaseStorage storage = new ItemDatabaseStorage();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try (var writer = resp.getWriter()) {
-            new Gson().toJson(this.storage, writer);
+            new Gson().toJson(this.storage.getAll(), writer);
         }
     }
 
@@ -37,11 +34,7 @@ public class ItemsServlet extends HttpServlet {
         try (var reader = req.getReader()) {
             item = new Gson().fromJson(reader, Item.class);
         }
-        if (item.getId() == -1) {
-            item.setId(random.nextInt());
-        }
-        this.storage.remove(item);
-        this.storage.add(item);
+        this.storage.merge(item);
         resp.setStatus(RESP_CODE_CREATED);
     }
 }
