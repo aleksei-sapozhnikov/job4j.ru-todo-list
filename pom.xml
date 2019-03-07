@@ -11,7 +11,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <liquibase.changeLogFile>${basedir}/target/classes/db/master.xml</liquibase.changeLogFile>
+        <liquibase.changeLogFile>target/classes/db/master.xml</liquibase.changeLogFile>
         <hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</hibernate.sql.dialect>
     </properties>
 
@@ -53,7 +53,8 @@
                         <artifactId>liquibase-maven-plugin</artifactId>
                         <version>3.6.3</version>
                         <configuration>
-                            <propertyFile>${basedir}/target/classes/db/heroku.properties</propertyFile>
+                            <propertyFile>target/classes/db/heroku.properties</propertyFile>
+                            <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
                         </configuration>
                     </plugin>
                     <!--
@@ -106,7 +107,6 @@
                 <db.username>tester</db.username>
                 <db.password>password</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
-                <liquibase.propertyFile>${basedir}/target/classes/db/test.properties</liquibase.propertyFile>
             </properties>
             <build>
                 <plugins>
@@ -115,12 +115,12 @@
                         <artifactId>liquibase-maven-plugin</artifactId>
                         <version>3.6.3</version>
                         <configuration>
-                            <propertyFile>${basedir}/target/classes/db/test.properties</propertyFile>
+                            <propertyFile>target/classes/db/test.properties</propertyFile>
+                            <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
                         </configuration>
                         <executions>
                             <execution>
-                                <!-- We need to filter resources variables before running liquibase -->
-                                <phase>compile</phase>
+                                <phase>process-resources</phase>
                                 <goals>
                                     <goal>update</goal>
                                 </goals>

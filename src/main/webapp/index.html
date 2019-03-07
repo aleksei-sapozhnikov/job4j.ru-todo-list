@@ -50,7 +50,7 @@
             }
 
             function getItems() {
-                let result = [];
+                let result = {error: 'Could not get list of objects from server'};
                 $.ajax({
                     type: 'GET',
                     async: false,
