@@ -12,6 +12,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <liquibase.changeLogFile>target/classes/db/master.xml</liquibase.changeLogFile>
+        <liquibase.promptOnNonLocalDatabase>false</liquibase.promptOnNonLocalDatabase>
         <hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</hibernate.sql.dialect>
     </properties>
 
@@ -55,6 +56,7 @@
                         <configuration>
                             <propertyFile>target/classes/db/heroku.properties</propertyFile>
                             <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
+                            <promptOnNonLocalDatabase>${liquibase.promptOnNonLocalDatabase}</promptOnNonLocalDatabase>
                         </configuration>
                     </plugin>
                     <!--
@@ -117,6 +119,7 @@
                         <configuration>
                             <propertyFile>target/classes/db/test.properties</propertyFile>
                             <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
+                            <promptOnNonLocalDatabase>${liquibase.promptOnNonLocalDatabase}</promptOnNonLocalDatabase>
                         </configuration>
                         <executions>
                             <execution>
