@@ -263,6 +263,7 @@
                 <version>3.6.2</version>
                 <configuration>
                     <changeLogFile>${basedir}/target/classes/db/master.xml</changeLogFile>
+                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                     <url>${db.url}</url>
                     <url>${env.JDBC_DATABASE_URL}</url>
                     <driver>${db.driver}</driver>
