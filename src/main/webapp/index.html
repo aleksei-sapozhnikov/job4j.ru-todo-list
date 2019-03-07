@@ -31,12 +31,12 @@
              * Path to servlet returning existing items.
              * HTTP GET method.
              */
-            const servletGetExistingItems = context + "/items";
+            const servletGetExistingItems = context + "items";
             /**
              * Path to servlet adding new item to storage.
              * HTTP POST method.
              */
-            const servletPostAddItem = context + '/items';
+            const servletPostAddItem = context + 'items';
 
             /* * * * * * * * * * * * * * * *
              * FUNCTIONS WORKING WITH ITEMS
@@ -50,34 +50,44 @@
             }
 
             function getItems() {
-                let result = '';
+                let result = [];
                 $.ajax({
                     type: 'GET',
                     async: false,
                     datatype: "application/json",
                     url: servletGetExistingItems,
                     success: function (response) {
-                        let received = JSON.parse(response);
-                        if (received.error != null) {
+                        if (response.error != null) {
                             alert(response.error);
                         } else {
-                            result = received;
+                            result = JSON.parse(response);
                         }
                     }
                 });
+                result.sort(compareItems);
                 return result;
             }
 
-            function addItem(item) {
+            function sendItem(item) {
                 $.ajax({
                     type: 'POST',
                     async: false,
                     data: JSON.stringify(item),
                     url: servletPostAddItem,
                     success: function (response) {
-                        let received = JSON.parse(response);
-                        if (received.error != null) {
+                        if (response.error != null) {
                             alert(response.error);
+                        } else {
+                            let stored = JSON.parse(response);
+                            let iOld = pageCurrentItems.findIndex(function (elt) {
+                                return elt.id === stored.id;
+                            });
+                            if (iOld !== -1) {
+                                pageCurrentItems[iOld] = stored;
+                            } else {
+                                pageCurrentItems.push(stored);
+                            }
+                            pageCurrentItems.sort(compareItems);
                         }
                     }
                 });
@@ -125,8 +135,7 @@
                 html += '<td>' + item.description + '</td>';
                 let date = new Date(item.created).toLocaleString();
                 html += `<td>${date}</td>`;
-                let checkboxId = `${item.id}-checkbox-done`;
-                html += `<td><input id="${checkboxId}" type="checkbox"${item.done ? ' checked' : ''}></td>`;
+                html += `<td><input name="${item.id}" type="checkbox" ${item.done ? 'checked' : ''}></td>`;
                 html += '</tr>';
                 return html;
             }
@@ -136,6 +145,18 @@
              * * * * * * * * */
             function isWhiteSpaceOnly(string) {
                 return /^\s*$/.test(string);
+            }
+
+            function compareItems(first, second) {
+                let result = 0;
+                if (first.done && !second.done) {
+                    result = 1;
+                } else if (!first.done && second.done) {
+                    result = -1
+                } else {
+                    result = first.created - second.created;
+                }
+                return result;
             }
 
             /* * * * * * * *
@@ -160,7 +181,7 @@
              * Loads list of existing items from server
              * and saves it to page variable
              */
-            function loadExistingItemsFromServer() {
+            function getAllItemsFromServer() {
                 pageCurrentItems = getItems();
             }
 
@@ -185,6 +206,13 @@
                 return $("#add-task-description").val();
             }
 
+            function findCheckedItem(changedElement) {
+                let searchId = Number.parseInt(changedElement.name);
+                return pageCurrentItems.find(function (element) {
+                    return element.id === searchId;
+                });
+            }
+
             /* * * * * * * * * * * * * * *
              * LISTENERS ON PAGE ELEMENTS
              * * * * * * * * * * * * * * */
@@ -197,11 +225,10 @@
                 if (isWhiteSpaceOnly(description)) {
                     alert("Item description is empty!")
                 } else {
-                    addItem(
+                    sendItem(
                         new Item(-1, description, created, false));
                 }
                 clearNewItemDescriptionElement();
-                loadExistingItemsFromServer();
                 redrawItemsTable();
             });
 
@@ -211,12 +238,21 @@
                 }
             });
 
+            $("#existing-items-table").on('change', "input", function () {
+                let item = findCheckedItem(this);
+                if (item !== undefined) {
+                    item.done = this.checked;
+                    sendItem(item);
+                    redrawItemsTable();
+                }
+            });
+
             /**
              * Listener on "Show all items" checkbox.
              */
             $("#showAll-checkbox").change(function () {
                 setIsShowAllFlag(this.checked);
-                redrawItemsTable(pageCurrentItems, pageIsShowAllItems)
+                redrawItemsTable();
             });
 
             /* * * * * * * * * * * * * * *
@@ -242,7 +278,7 @@
 <div class="container" style="margin-top: 20px">
     <div class="input-group">
         <textarea class="form-control" id="add-task-description"
-                  placeholder="Enter task description. <Enter> to submit. <Shift + Enter> to add new line"></textarea>
+                  placeholder="Enter task description. <Enter> to submit."></textarea>
         <div class="input-group-prepend">
             <button class="btn btn-primary" id="add-task-submit" type="button">Add task</button>
         </div>
