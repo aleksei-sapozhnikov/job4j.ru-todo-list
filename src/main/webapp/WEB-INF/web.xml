@@ -7,6 +7,7 @@
     <servlet>
         <servlet-name>ItemsServlet</servlet-name>
         <servlet-class>todolist.servlet.ItemsServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>ItemsServlet</servlet-name>

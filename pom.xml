@@ -14,24 +14,36 @@
 
     <profiles>
         <profile>
+            <id>heroku</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>env.HOME</name>
+                    <value>/app</value>
+                </property>
+            </activation>
+            <properties>
+                <!--suppress UnresolvedMavenProperty -->
+                <db.url>${database.jdbcUrl}</db.url>
+                <!--suppress UnresolvedMavenProperty -->
+                <db.username>${database.username}</db.username>
+                <!--suppress UnresolvedMavenProperty -->
+                <db.password>${database.password}</db.password>
+                <db.driver>org.postgresql.Driver</db.driver>
+                <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
+            </properties>
+        </profile>
+        <profile>
             <id>test</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <db.url>jdbc:postgresql://127.0.0.1:5432/test</db.url>
+                <db.url>jdbc:postgresql://127.0.0.1:5432/test_db</db.url>
                 <db.username>tester</db.username>
                 <db.password>password</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
-            </properties>
-        </profile>
-        <profile>
-            <id>production</id>
-            <properties>
-                <db.url>jdbc:postgresql://127.0.0.1:5432/production</db.url>
-                <db.username>producer</db.username>
-                <db.password>password</db.password>
-                <db.driver>org.postgresql.Driver</db.driver>
+                <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
         </profile>
     </profiles>
@@ -84,15 +96,22 @@
         </dependency>
 
         <!-- Database -->
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.3-1100-jdbc41</version>
+            <version>42.2.5</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
             <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.4.1.Final</version>
         </dependency>
 
         <!--Logger-->
@@ -107,9 +126,25 @@
             <version>2.11.0</version>
         </dependency>
 
+        <!-- Library to parse JDBC_DATABASE_URL into Maven profile properties -->
+        <!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.5.6</version>
+            <type>pom</type>
+        </dependency>
+
+
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -172,6 +207,73 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo>db.url: ${db.url}</echo>
+                                <echo>db.username: ${db.username}</echo>
+                                <echo>db.password: ${db.password}</echo>
+                                <echo>db.driver: ${db.driver}</echo>
+                                <echo>db.hibernate.sql.dialect.: ${db.hibernate.sql.dialect}</echo>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scripts>
+                        <script>
+                            <![CDATA[
+                            if (System.getenv("DATABASE_URL") != null) {
+                                URI dbUri = new URI(System.getenv("DATABASE_URL"));
+                                String username = dbUri.getUserInfo().split(":")[0];
+                                String password = dbUri.getUserInfo().split(":")[1];
+                                int port = dbUri.getPort();
+                                String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
+                                project.properties['database.jdbcUrl'] = dbUrl
+                                project.properties['database.username'] = username
+                                project.properties['database.password'] = password
+                            }
+                            ]]>
+                        </script>
+                    </scripts>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <changeLogFile>${basedir}/target/classes/db/master.xml</changeLogFile>
+                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                    <url>${db.url}</url>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <url>${env.JDBC_DATABASE_URL}</url>
+                    <driver>${db.driver}</driver>
+                    <username>${db.username}</username>
+                    <password>${db.password}</password>
+                    <dropFirst>true</dropFirst>
+                </configuration>
             </plugin>
         </plugins>
     </build>
