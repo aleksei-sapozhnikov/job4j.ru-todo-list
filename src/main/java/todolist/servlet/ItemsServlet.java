@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class ItemsServlet extends HttpServlet {
     private static final int RESP_CODE_CREATED = 201;
-    private final ItemDatabaseStorage storage = new ItemDatabaseStorage();
+    private final ItemDatabaseStorage storage = (ItemDatabaseStorage) this.getServletContext().getAttribute("storage");
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

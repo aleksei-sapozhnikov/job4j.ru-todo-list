@@ -6,6 +6,7 @@
     <version>0.1</version>
     <name>todo-list</name>
 
+    <!-- General properties for all -->
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -15,6 +16,9 @@
     </properties>
 
     <profiles>
+        <!--
+          ** Profile to deploy on heroku.com
+        -->
         <profile>
             <id>heroku</id>
             <activation>
@@ -25,29 +29,73 @@
                 </property>
             </activation>
             <properties>
+                <!--
+                  ** These properties are parsed from Heroku environment variables
+                  ** using gmaven plugin
+                -->
                 <!--suppress UnresolvedMavenProperty -->
-                <db.url>${database.jdbcUrl}</db.url>
+                <db.url>${heroku.db.jdbcUrl}</db.url>
                 <!--suppress UnresolvedMavenProperty -->
-                <db.username>${database.username}</db.username>
+                <db.username>${heroku.db.username}</db.username>
                 <!--suppress UnresolvedMavenProperty -->
-                <db.password>${database.password}</db.password>
+                <db.password>${heroku.db.password}</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
             </properties>
             <build>
                 <plugins>
+                    <!--
+                      ** Liquibase will start separately after project build,
+                      ** iun the release phase (see Procfile).
+                      ** But we set all necessary properties for the run here.
+                    -->
                     <plugin>
                         <groupId>org.liquibase</groupId>
                         <artifactId>liquibase-maven-plugin</artifactId>
                         <version>3.6.3</version>
                         <configuration>
-                            <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
                             <propertyFile>${basedir}/target/classes/db/heroku.properties</propertyFile>
-                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                        </configuration>
+                    </plugin>
+                    <!--
+                      ** Parses jdbc url, username, password from Heroku environment variables.
+                      ** Script language is Groovy.
+                    -->
+                    <plugin>
+                        <groupId>org.codehaus.gmavenplus</groupId>
+                        <artifactId>gmavenplus-plugin</artifactId>
+                        <version>1.2</version>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <scripts>
+                                <script>
+                                    <![CDATA[
+                                        URI dbUri = new URI(System.getenv("DATABASE_URL"));
+                                        String username = dbUri.getUserInfo().split(":")[0];
+                                        String password = dbUri.getUserInfo().split(":")[1];
+                                        int port = dbUri.getPort();
+                                        String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
+                                        project.properties['heroku.db.jdbcUrl'] = dbUrl
+                                        project.properties['heroku.db.username'] = username
+                                        project.properties['heroku.db.password'] = password
+                                    ]]>
+                                </script>
+                            </scripts>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
+
+        <!--
+          ** Profile for local tests on testing database.
+        -->
         <profile>
             <id>test</id>
             <activation>
@@ -67,12 +115,11 @@
                         <artifactId>liquibase-maven-plugin</artifactId>
                         <version>3.6.3</version>
                         <configuration>
-                            <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
                             <propertyFile>${basedir}/target/classes/db/test.properties</propertyFile>
-                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                         </configuration>
                         <executions>
                             <execution>
+                                <!-- We need to filter resources variables before running liquibase -->
                                 <phase>compile</phase>
                                 <goals>
                                     <goal>update</goal>
@@ -85,6 +132,9 @@
         </profile>
     </profiles>
 
+    <!--
+      ** Project dependencies.
+     -->
     <dependencies>
 
         <!--Testing-->
@@ -133,13 +183,11 @@
         </dependency>
 
         <!-- Database -->
-        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
@@ -163,8 +211,7 @@
             <version>2.11.0</version>
         </dependency>
 
-        <!-- Library to parse JDBC_DATABASE_URL into Maven profile properties -->
-        <!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all -->
+        <!-- Library to parse Heroku env. variables Maven Heroku profile properties -->
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
@@ -172,9 +219,11 @@
             <type>pom</type>
         </dependency>
 
-
     </dependencies>
 
+    <!--
+      ** General build properties.
+    -->
     <build>
         <resources>
             <resource>
@@ -183,6 +232,8 @@
             </resource>
         </resources>
         <plugins>
+
+            <!-- Checkstyle -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -204,6 +255,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Test coverage: jacoco -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -223,6 +276,11 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--
+              ** Runner for web-application to launch it on heroku.
+              ** See also Procfile.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -245,6 +303,11 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--
+              ** Informational plugin: shows values of maven variables
+              ** during project build.
+            -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -265,37 +328,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <scripts>
-                        <script>
-                            <![CDATA[
-                            if (System.getenv("DATABASE_URL") != null) {
-                                URI dbUri = new URI(System.getenv("DATABASE_URL"));
-                                String username = dbUri.getUserInfo().split(":")[0];
-                                String password = dbUri.getUserInfo().split(":")[1];
-                                int port = dbUri.getPort();
-                                String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
-                                project.properties['database.jdbcUrl'] = dbUrl
-                                project.properties['database.username'] = username
-                                project.properties['database.password'] = password
-                            }
-                            ]]>
-                        </script>
-                    </scripts>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 </project>

@@ -12,31 +12,40 @@ import java.util.Objects;
  * @version 0.1
  * @since 0.1
  */
-public class Item implements Comparable<Item> {
+public class Item {
     /**
      * Logger.
      */
+    @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(Item.class);
 
+    /**
+     * Item id.
+     */
     private int id;
+    /**
+     * Item description.
+     */
     private String description;
+    /**
+     * Time of creation (milliseconds).
+     */
     private long created;
+    /**
+     * Flag 'done'/'not done'.
+     */
     private boolean done;
 
-    public Item() {
-    }
+    /* * * * * * * * * * * * * *
+     * OBJECT UTILITY METHODS  *
+     * * * * * * * * * * * * * */
 
-    @Override
-    public String toString() {
-        return String.format("Item{id=%d, description='%s', created=%d, done=%s}", id, description, created, done);
-    }
-
-    @Override
-    public int compareTo(Item o) {
-        var result = this.id - o.id;
-        return result == 0 ? result : (int) (this.created - o.created);
-    }
-
+    /**
+     * Override Object.equals().
+     *
+     * @param o Other object.
+     * @return <tt>true</tt> if equal, <tt>false if not</tt>
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -50,6 +59,30 @@ public class Item implements Comparable<Item> {
     }
 
     /**
+     * Override Object.hashcode().
+     *
+     * @return Object hashcode.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    /**
+     * Override Object.toString().
+     *
+     * @return String representation of the object.
+     */
+    @Override
+    public String toString() {
+        return String.format("Item{id=%d, description='%s', created=%d, done=%s}", id, description, created, done);
+    }
+
+    /* * * * * * * * * * * *
+     * SETTERS AND GETTERS *
+     * * * * * * * * * * * */
+
+    /**
      * Returns id.
      *
      * @return Value of id field.
@@ -58,6 +91,11 @@ public class Item implements Comparable<Item> {
         return this.id;
     }
 
+    /**
+     * Sets id value.
+     *
+     * @param id Value to set.
+     */
     public void setId(int id) {
         this.id = id;
     }
@@ -71,6 +109,11 @@ public class Item implements Comparable<Item> {
         return this.description;
     }
 
+    /**
+     * Sets description value.
+     *
+     * @param description Value to set.
+     */
     public void setDescription(String description) {
         this.description = description;
     }
@@ -84,6 +127,11 @@ public class Item implements Comparable<Item> {
         return this.created;
     }
 
+    /**
+     * Sets created value.
+     *
+     * @param created Value to set.
+     */
     public void setCreated(long created) {
         this.created = created;
     }
@@ -97,12 +145,12 @@ public class Item implements Comparable<Item> {
         return this.done;
     }
 
+    /**
+     * Sets done value.
+     *
+     * @param done Value to set.
+     */
     public void setDone(boolean done) {
         this.done = done;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
