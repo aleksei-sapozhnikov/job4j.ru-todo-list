@@ -264,6 +264,7 @@
                 <configuration>
                     <changeLogFile>${basedir}/target/classes/db/master.xml</changeLogFile>
                     <url>${db.url}</url>
+                    <url>${env.JDBC_DATABASE_URL}</url>
                     <driver>${db.driver}</driver>
                     <username>${db.username}</username>
                     <password>${db.password}</password>
