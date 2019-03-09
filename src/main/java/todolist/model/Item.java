@@ -12,7 +12,7 @@ import java.util.Objects;
  * @version 0.1
  * @since 0.1
  */
-public class Item {
+public class Item implements TaskBean {
     /**
      * Logger.
      */
@@ -87,6 +87,7 @@ public class Item {
      *
      * @return Value of id field.
      */
+    @Override
     public int getId() {
         return this.id;
     }
@@ -96,6 +97,7 @@ public class Item {
      *
      * @param id Value to set.
      */
+    @Override
     public void setId(int id) {
         this.id = id;
     }
@@ -105,6 +107,7 @@ public class Item {
      *
      * @return Value of description field.
      */
+    @Override
     public String getDescription() {
         return this.description;
     }
@@ -114,6 +117,7 @@ public class Item {
      *
      * @param description Value to set.
      */
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }
@@ -123,6 +127,7 @@ public class Item {
      *
      * @return Value of created field.
      */
+    @Override
     public long getCreated() {
         return this.created;
     }
@@ -132,6 +137,7 @@ public class Item {
      *
      * @param created Value to set.
      */
+    @Override
     public void setCreated(long created) {
         this.created = created;
     }
@@ -141,6 +147,7 @@ public class Item {
      *
      * @return Value of done field.
      */
+    @Override
     public boolean isDone() {
         return this.done;
     }
@@ -150,6 +157,7 @@ public class Item {
      *
      * @param done Value to set.
      */
+    @Override
     public void setDone(boolean done) {
         this.done = done;
     }

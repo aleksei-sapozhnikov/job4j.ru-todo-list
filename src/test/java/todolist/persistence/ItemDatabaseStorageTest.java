@@ -3,6 +3,7 @@ package todolist.persistence;
 import org.junit.After;
 import org.junit.Test;
 import todolist.model.Item;
+import todolist.model.TaskBean;
 
 import java.util.ArrayList;
 
@@ -13,7 +14,7 @@ public class ItemDatabaseStorageTest {
 
     private final ItemDatabaseStorage storage = ItemDatabaseStorage.INSTANCE;
 
-    private Item createItem(int id, String description, long created, boolean done) {
+    private TaskBean createItem(int id, String description, long created, boolean done) {
         var item = new Item();
         item.setId(id);
         item.setDescription(description);
@@ -22,7 +23,7 @@ public class ItemDatabaseStorageTest {
         return item;
     }
 
-    private Item createItem(String description, long created, boolean done) {
+    private TaskBean createItem(String description, long created, boolean done) {
         return this.createItem(0, description, created, done);
     }
 

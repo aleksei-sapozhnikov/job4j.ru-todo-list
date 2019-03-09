@@ -4,8 +4,9 @@ import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import todolist.Constants;
+import todolist.constants.ContextAttrs;
 import todolist.model.Item;
+import todolist.model.TaskBean;
 import todolist.persistence.ItemStorage;
 
 import javax.servlet.ServletContext;
@@ -32,7 +33,7 @@ public class ItemsServletTest {
         }
     };
 
-    private Item createItem(int id, String description, long created, boolean done) {
+    private TaskBean createItem(int id, String description, long created, boolean done) {
         var item = new Item();
         item.setId(id);
         item.setDescription(description);
@@ -44,7 +45,7 @@ public class ItemsServletTest {
     @Before
     public void initContext() {
         when(this.context
-                .getAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue()))
+                .getAttribute(ContextAttrs.STORAGE.v()))
                 .thenReturn(this.storage);
     }
 
@@ -52,7 +53,7 @@ public class ItemsServletTest {
     public void whenInitThenStorageTakenFromServletContext() {
         this.testServlet.init();
         Mockito.verify(this.context)
-                .getAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue());
+                .getAttribute(ContextAttrs.STORAGE.v());
     }
 
     @Test

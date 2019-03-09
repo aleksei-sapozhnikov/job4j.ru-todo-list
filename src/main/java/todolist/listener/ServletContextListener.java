@@ -2,7 +2,7 @@ package todolist.listener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import todolist.Constants;
+import todolist.constants.ContextAttrs;
 import todolist.persistence.ItemDatabaseStorage;
 import todolist.persistence.ItemStorage;
 
@@ -29,9 +29,9 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        ItemStorage storage = ItemDatabaseStorage.INSTANCE;
-        sce.getServletContext()
-                .setAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue(), storage);
+        sce.getServletContext().setAttribute(
+                ContextAttrs.STORAGE.v(),
+                ItemDatabaseStorage.INSTANCE);
     }
 
     /**
@@ -42,7 +42,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         var storage = (ItemStorage) sce.getServletContext()
-                .getAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue());
+                .getAttribute(ContextAttrs.STORAGE.v());
         try {
             storage.close();
         } catch (Exception e) {

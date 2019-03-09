@@ -60,7 +60,7 @@ public class ItemTest {
         assertSame(main.hashCode(), otherDone.hashCode());
     }
 
-    private Item createItem(int id, String description, long created, boolean done) {
+    private TaskBean createItem(int id, String description, long created, boolean done) {
         var item = new Item();
         item.setId(id);
         item.setDescription(description);

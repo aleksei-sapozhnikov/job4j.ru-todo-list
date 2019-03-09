@@ -1,8 +1,10 @@
 package todolist.servlet;
 
 import com.google.gson.Gson;
-import todolist.Constants;
+import todolist.constants.ContextAttrs;
+import todolist.constants.HttpCodes;
 import todolist.model.Item;
+import todolist.model.TaskBean;
 import todolist.persistence.ItemStorage;
 
 import javax.servlet.http.HttpServlet;
@@ -18,11 +20,6 @@ import java.io.IOException;
  * @since 0.1
  */
 public class ItemsServlet extends HttpServlet {
-
-    /**
-     * HTTP status code meaning 'created'.
-     */
-    private static final int RESP_CODE_CREATED = 201;
     /**
      * Storage of items.
      */
@@ -34,7 +31,7 @@ public class ItemsServlet extends HttpServlet {
     @Override
     public void init() {
         this.storage = (ItemStorage) this.getServletContext()
-                .getAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue());
+                .getAttribute(ContextAttrs.STORAGE.v());
     }
 
     /**
@@ -65,10 +62,10 @@ public class ItemsServlet extends HttpServlet {
              var writer = resp.getWriter()
         ) {
             var gson = new Gson();
-            var item = gson.fromJson(reader, Item.class);
+            TaskBean item = gson.fromJson(reader, Item.class);
             item = this.storage.merge(item);
             gson.toJson(item, writer);
         }
-        resp.setStatus(RESP_CODE_CREATED);
+        resp.setStatus(HttpCodes.CREATED.v());
     }
 }

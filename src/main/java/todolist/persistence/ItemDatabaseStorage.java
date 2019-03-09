@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import todolist.model.Item;
+import todolist.model.TaskBean;
 
 import java.util.List;
 
@@ -39,15 +40,15 @@ public enum ItemDatabaseStorage implements ItemStorage {
     /**
      * Finds item by id and return Item object.
      *
-     * @param item Item object with search information (id).
+     * @param task Item object with search information (id).
      * @return Item with given id from database.
      */
     @Override
-    public Item get(Item item) {
-        Item result;
+    public TaskBean get(TaskBean task) {
+        TaskBean result;
         try (var session = factory.openSession()) {
             session.beginTransaction();
-            result = session.get(Item.class, item.getId());
+            result = session.get(Item.class, task.getId());
             session.getTransaction().commit();
         }
         return result;
@@ -57,15 +58,15 @@ public enum ItemDatabaseStorage implements ItemStorage {
      * If id of given item found in database, updates item.
      * Otherwise adds given item to database with id given by database.
      *
-     * @param item Item to store or to use as update.
+     * @param task Item to store or to use as update.
      * @return Item object stored in database, with id given by database.
      */
     @Override
-    public Item merge(Item item) {
-        Item result;
+    public TaskBean merge(TaskBean task) {
+        TaskBean result;
         try (var session = this.factory.openSession()) {
             session.beginTransaction();
-            result = (Item) session.merge(item);
+            result = (TaskBean) session.merge(task);
             session.getTransaction().commit();
         }
         return result;
@@ -78,8 +79,8 @@ public enum ItemDatabaseStorage implements ItemStorage {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public List<Item> getAll() {
-        List<Item> result;
+    public List<TaskBean> getAll() {
+        List<TaskBean> result;
         try (var session = this.factory.openSession()) {
             session.beginTransaction();
             var query = session.createQuery("from Item");
