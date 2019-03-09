@@ -158,10 +158,26 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>2.0.2-beta</version>
+            <artifactId>mockito-core</artifactId>
+            <version>2.25.0</version>
             <scope>test</scope>
         </dependency>
+        <!--       <dependency>
+                   <groupId>org.powermock</groupId>
+                   <artifactId>powermock-module-junit4</artifactId>
+                   <version>2.0.0</version>
+                   <scope>test</scope>
+                   <exclusions>
+                       <exclusion>
+                           <groupId>net.bytebuddy</groupId>
+                           <artifactId>byte-buddy</artifactId>
+                       </exclusion>
+                       <exclusion>
+                           <groupId>org.objenesis</groupId>
+                           <artifactId>objenesis</artifactId>
+                       </exclusion>
+                   </exclusions>
+               </dependency>-->
 
         <!--Servlet-->
         <dependency>
@@ -204,6 +220,14 @@
             <artifactId>hibernate-core</artifactId>
             <version>5.4.1.Final</version>
         </dependency>
+        <!--Database to use in tests-->
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.4.1</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <!--Logger-->
         <dependency>
@@ -237,6 +261,12 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
 
             <!-- Checkstyle -->

@@ -1,8 +1,9 @@
 package todolist.servlet;
 
 import com.google.gson.Gson;
+import todolist.Constants;
 import todolist.model.Item;
-import todolist.persistence.ItemDatabaseStorage;
+import todolist.persistence.ItemStorage;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,15 +18,23 @@ import java.io.IOException;
  * @since 0.1
  */
 public class ItemsServlet extends HttpServlet {
+
+    /**
+     * HTTP status code meaning 'created'.
+     */
     private static final int RESP_CODE_CREATED = 201;
-    private ItemDatabaseStorage storage;
+    /**
+     * Storage of items.
+     */
+    private ItemStorage storage;
 
     /**
      * Inits servlet-used objects.
      */
     @Override
     public void init() {
-        this.storage = (ItemDatabaseStorage) this.getServletContext().getAttribute("storage");
+        this.storage = (ItemStorage) this.getServletContext()
+                .getAttribute(Constants.SERVLET_CONTEXT_ATTR_STORAGE.getValue());
     }
 
     /**

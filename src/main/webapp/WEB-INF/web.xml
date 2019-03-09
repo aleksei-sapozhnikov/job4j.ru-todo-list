@@ -15,20 +15,11 @@
     </servlet-mapping>
 
     <filter>
-        <filter-name>CharacterEncodingUtf8Filter</filter-name>
-        <filter-class>todolist.filter.CharacterEncodingUtf8Filter</filter-class>
+        <filter-name>ResponseParametersFilter</filter-name>
+        <filter-class>todolist.filter.ResponseParametersFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>CharacterEncodingUtf8Filter</filter-name>
-        <url-pattern>*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>ContentTypeTextHtmlFilter</filter-name>
-        <filter-class>todolist.filter.ContentTypeTextHtmlFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>ContentTypeTextHtmlFilter</filter-name>
+        <filter-name>ResponseParametersFilter</filter-name>
         <url-pattern>*</url-pattern>
     </filter-mapping>
 

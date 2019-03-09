@@ -2,8 +2,9 @@ package todolist.listener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.cfg.Configuration;
+import todolist.Constants;
 import todolist.persistence.ItemDatabaseStorage;
+import todolist.persistence.ItemStorage;
 
 import javax.servlet.ServletContextEvent;
 
@@ -28,11 +29,9 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        var factory = new Configuration().configure().buildSessionFactory();
-        var storage = new ItemDatabaseStorage(
-                "I know there must be only one instance created of this class in the application. I really know what I'm doing!",
-                factory);
-        sce.getServletContext().setAttribute("storage", storage);
+        ItemStorage storage = ItemDatabaseStorage.INSTANCE;
+        sce.getServletContext()
+                .setAttribute(Constants.SERVLET_CONTEXT_ATTR_STORAGE.getValue(), storage);
     }
 
     /**
@@ -42,7 +41,14 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
      */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        var storage = (ItemDatabaseStorage) sce.getServletContext().getAttribute("storage");
-        storage.close();
+        var storage = (ItemStorage) sce.getServletContext()
+                .getAttribute(Constants.SERVLET_CONTEXT_ATTR_STORAGE.getValue());
+        try {
+            storage.close();
+        } catch (Exception e) {
+            var re = new RuntimeException("Unexpected exception on resource close");
+            re.addSuppressed(e);
+            throw re;
+        }
     }
 }
