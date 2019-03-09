@@ -31,7 +31,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
     public void contextInitialized(ServletContextEvent sce) {
         ItemStorage storage = ItemDatabaseStorage.INSTANCE;
         sce.getServletContext()
-                .setAttribute(Constants.SERVLET_CONTEXT_ATTR_STORAGE.getValue(), storage);
+                .setAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue(), storage);
     }
 
     /**
@@ -42,7 +42,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         var storage = (ItemStorage) sce.getServletContext()
-                .getAttribute(Constants.SERVLET_CONTEXT_ATTR_STORAGE.getValue());
+                .getAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue());
         try {
             storage.close();
         } catch (Exception e) {

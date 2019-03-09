@@ -1,7 +1,7 @@
 package todolist;
 
 public enum Constants {
-    SERVLET_CONTEXT_ATTR_STORAGE("storage");
+    CONTEXT_ATTR_STORAGE("storage");
 
     private final String value;
 

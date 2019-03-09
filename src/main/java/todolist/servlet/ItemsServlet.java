@@ -34,7 +34,7 @@ public class ItemsServlet extends HttpServlet {
     @Override
     public void init() {
         this.storage = (ItemStorage) this.getServletContext()
-                .getAttribute(Constants.SERVLET_CONTEXT_ATTR_STORAGE.getValue());
+                .getAttribute(Constants.CONTEXT_ATTR_STORAGE.getValue());
     }
 
     /**
