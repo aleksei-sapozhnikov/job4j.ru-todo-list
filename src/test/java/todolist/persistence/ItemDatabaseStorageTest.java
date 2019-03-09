@@ -6,7 +6,8 @@ import todolist.model.Item;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class ItemDatabaseStorageTest {
 
@@ -32,49 +33,42 @@ public class ItemDatabaseStorageTest {
 
     @Test
     public void whenMergeItemWithNewIdThenItemAdded() {
-        var added = this.createItem("item one", 123, true);
-        this.storage.merge(added);
-        var all = this.storage.getAll();
-        assertEquals(all.size(), 1);
-        //
-        var found = all.get(0);
-        assertEquals(found.getDescription(), "item one");
-        assertEquals(found.getCreated(), 123);
-        assertTrue(found.isDone());
+        var toAdd = this.createItem("item one", 123, true);
+        var added = this.storage.merge(toAdd);
+        assertEquals(added.getDescription(), toAdd.getDescription());
+        assertEquals(added.getCreated(), toAdd.getCreated());
+        assertEquals(added.isDone(), toAdd.isDone());
+        assertEquals(this.storage.getAll().size(), 1);
     }
 
     @Test
     public void whenMergeItemWithExistingIdThenItemUpdated() {
-        var added = this.createItem("item", 123, true);
-        this.storage.merge(added);
-        var addedId = this.storage.getAll().get(0).getId();
-        var update = this.createItem(addedId, "updated item", 567, false);
-        this.storage.merge(update);
-        var all = this.storage.getAll();
-        assertEquals(all.size(), 1);
-        //
-        var found = all.get(0);
-        assertEquals(found.getDescription(), "updated item");
-        assertEquals(found.getCreated(), 567);
-        assertFalse(found.isDone());
+        var toAdd = this.createItem("item", 123, true);
+        var added = this.storage.merge(toAdd);
+        var toUpdate = this.createItem(added.getId(), "updated item", 567, false);
+        var updated = this.storage.merge(toUpdate);
+        assertEquals(updated.getId(), added.getId());
+        assertEquals(updated.getDescription(), toUpdate.getDescription());
+        assertEquals(updated.getCreated(), toUpdate.getCreated());
+        assertEquals(updated.isDone(), toUpdate.isDone());
+        assertEquals(this.storage.getAll().size(), 1);
     }
 
     @Test
     public void whenSearchItemThenItemFound() {
-        var needed = this.createItem("item", 123, true);
-        this.storage.merge(needed);
-        var neededId = this.storage.getAll().get(0).getId();
+        var toAdd = this.createItem("item", 123, true);
+        var added = this.storage.merge(toAdd);
         this.storage.merge(this.createItem("item2", 234, false));
         this.storage.merge(this.createItem("item3", 456, true));
         assertEquals(this.storage.getAll().size(), 3);
         //
         var search = new Item();
-        search.setId(neededId);
+        search.setId(added.getId());
         var found = this.storage.get(search);
-        assertEquals(found.getId(), neededId);
-        assertEquals(found.getDescription(), needed.getDescription());
-        assertEquals(found.getCreated(), needed.getCreated());
-        assertEquals(found.isDone(), needed.isDone());
+        assertEquals(found.getId(), added.getId());
+        assertEquals(found.getDescription(), added.getDescription());
+        assertEquals(found.getCreated(), added.getCreated());
+        assertEquals(found.isDone(), added.isDone());
     }
 
     @Test
