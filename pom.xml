@@ -232,7 +232,6 @@
             <scope>test</scope>
         </dependency>
 
-
         <!--Logger-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -294,6 +293,20 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Without that maven uses TestNG and skips tests. Don't know why -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>3.0.0-M3</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!-- Test coverage: jacoco -->
