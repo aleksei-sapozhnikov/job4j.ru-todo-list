@@ -2,12 +2,14 @@ package todolist.persistence;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import todolist.model.Item;
 import todolist.model.TaskBean;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Database storage api using Hibernate.
@@ -45,13 +47,8 @@ public enum ItemDatabaseStorage implements ItemStorage {
      */
     @Override
     public TaskBean get(TaskBean task) {
-        TaskBean result;
-        try (var session = factory.openSession()) {
-            session.beginTransaction();
-            result = session.get(Item.class, task.getId());
-            session.getTransaction().commit();
-        }
-        return result;
+        return this.performTransaction(
+                session -> session.get(Item.class, task.getId()));
     }
 
     /**
@@ -63,13 +60,8 @@ public enum ItemDatabaseStorage implements ItemStorage {
      */
     @Override
     public TaskBean merge(TaskBean task) {
-        TaskBean result;
-        try (var session = this.factory.openSession()) {
-            session.beginTransaction();
-            result = (TaskBean) session.merge(task);
-            session.getTransaction().commit();
-        }
-        return result;
+        return this.performTransaction(
+                session -> (TaskBean) session.merge(task));
     }
 
     /**
@@ -80,14 +72,8 @@ public enum ItemDatabaseStorage implements ItemStorage {
     @Override
     @SuppressWarnings("unchecked")
     public List<TaskBean> getAll() {
-        List<TaskBean> result;
-        try (var session = this.factory.openSession()) {
-            session.beginTransaction();
-            var query = session.createQuery("from Item");
-            result = query.list();
-            session.getTransaction().commit();
-        }
-        return result;
+        return this.performTransaction(
+                session -> session.createQuery("from Item").list());
     }
 
     /**
@@ -96,12 +82,25 @@ public enum ItemDatabaseStorage implements ItemStorage {
      * For test purposes only.
      */
     void clear() {
-        try (var session = this.factory.openSession()) {
-            session.beginTransaction();
-            var query = session.createQuery("delete from Item");
-            query.executeUpdate();
-            session.getTransaction().commit();
+        this.performTransaction(
+                session -> session.createQuery("delete from Item").executeUpdate());
+    }
+
+    /**
+     * Performs transaction: creates session, performs given operations, commits and closes.
+     *
+     * @param operations Function: operations to perform.
+     * @param <T>        Result type.
+     * @return Operation result.
+     */
+    private <T> T performTransaction(final Function<Session, T> operations) {
+        T result;
+        try (final var session = this.factory.openSession()) {
+            var transaction = session.beginTransaction();
+            result = operations.apply(session);
+            transaction.commit();
         }
+        return result;
     }
 
     /**
