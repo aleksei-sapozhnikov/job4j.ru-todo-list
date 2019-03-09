@@ -9,6 +9,9 @@ sudo: false
 services:
   - postgresql
 
+addons:
+  postgresql: "9.6"
+
 # Create testing databases
 before_install:
   # Create usual database
