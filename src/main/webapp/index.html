@@ -16,6 +16,11 @@
             src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script crossorigin="anonymous" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <!-- Custom scripts -->
+    <script src="js/ajaxItems.js"></script>
+    <script src="js/itemCommons.js"></script>
+    <script src="js/itemsTable.js"></script>
+    <script src="js/utility.js"></script>
 
     <script>
         $(function () {
@@ -38,130 +43,9 @@
              */
             const servletPostAddItem = context + 'items';
 
-            /* * * * * * * * * * * * * * * *
-             * FUNCTIONS WORKING WITH ITEMS
-             * * * * * * * * * * * * * * * */
-
-            function Item(id, description, created, done) {
-                this.id = id;
-                this.description = description;
-                this.created = created;
-                this.done = done;
-            }
-
-            function getItems() {
-                let result = [];
-                $.ajax({
-                    type: 'GET',
-                    async: false,
-                    datatype: "application/json",
-                    url: servletGetExistingItems,
-                    success: function (response) {
-                        if (response.error != null) {
-                            alert(response.error);
-                        } else {
-                            result = JSON.parse(response);
-                        }
-                    }
-                });
-                result.sort(compareItems);
-                return result;
-            }
-
-            function sendItem(item) {
-                $.ajax({
-                    type: 'POST',
-                    async: false,
-                    data: JSON.stringify(item),
-                    url: servletPostAddItem,
-                    success: function (response) {
-                        if (response.error != null) {
-                            alert(response.error);
-                        } else {
-                            let stored = JSON.parse(response);
-                            let iOld = pageCurrentItems.findIndex(function (elt) {
-                                return elt.id === stored.id;
-                            });
-                            if (iOld !== -1) {
-                                pageCurrentItems[iOld] = stored;
-                            } else {
-                                pageCurrentItems.push(stored);
-                            }
-                            pageCurrentItems.sort(compareItems);
-                        }
-                    }
-                });
-            }
-
-            /**
-             * Function drawing table of existing items
-             *
-             * @param items Array of existing items to show in table.
-             * @param isShowAll Flag. True means show items which are done,
-             * False means not to show.
-             */
-            function constructItemsTable(items, isShowAll) {
-                let html = '';
-                html += '<table id="existing-items-table" class="table table-bordered">';
-                html += constructItemsTableHead();
-                html += '<tbody style="text-align:center">';
-                items.forEach(function (item) {
-                    if (isShowAll || !(item.done)) {
-                        html += constructItemsTableOneItemRow(item);
-                    }
-                });
-                html += '</tbody>';
-                html += "</table>";
-                return html;
-            }
-
-            function constructItemsTableHead() {
-                let html = '';
-                html += '<thead style="text-align:center;">';
-                html += '<tr>';
-                html += '<th>ID</th>';
-                html += '<th>Description</th>';
-                html += '<th>Created</th>';
-                html += '<th>Done</th>';
-                html += '</tr>';
-                html += '</thead>';
-                return html;
-            }
-
-            function constructItemsTableOneItemRow(item) {
-                let html = '';
-                html += '<tr>';
-                html += '<td>' + item.id + '</td>';
-                html += '<td>' + item.description + '</td>';
-                let date = new Date(item.created).toLocaleString();
-                html += `<td>${date}</td>`;
-                html += `<td><input name="${item.id}" type="checkbox" ${item.done ? 'checked' : ''}></td>`;
-                html += '</tr>';
-                return html;
-            }
-
-            /* * * * * * * * *
-             * UTILITY FUNCTIONS
-             * * * * * * * * */
-            function isWhiteSpaceOnly(string) {
-                return /^\s*$/.test(string);
-            }
-
-            function compareItems(first, second) {
-                let result = 0;
-                if (first.done && !second.done) {
-                    result = 1;
-                } else if (!first.done && second.done) {
-                    result = -1
-                } else {
-                    result = first.created - second.created;
-                }
-                return result;
-            }
-
             /* * * * * * * *
-             * PAGE VARIABLES
-             * * * * * * * */
+            * PAGE VARIABLES
+            * * * * * * * */
             /**
              * Flag. Defines what existing items to show in items table.
              * True means show all items including ones which are done.
@@ -172,19 +56,36 @@
              * Stores list of items loaded from server. To avoid ajax queries
              * every time we toggle "Show all" checkbox.
              */
-            let pageCurrentItems = getItems();
+            let pageCurrentItems;
 
-            /* * * * * * * * * * * * * * * * * * * * * * * * *
-             * FUNCTIONS CHANGING PAGE VARIABLES AND ELEMENTS
-             * * * * * * * * * * * * * * * * * * * * * * * * */
+
+            /* * * * * * * * * * * * * * * * * * * * * * * *
+             * OPERATIONS WITH PAGE VARIABLES AND ELEMENTS
+             * * * * * * * * * * * * * * * * * * * * * * * */
+
             /**
              * Loads list of existing items from server
              * and saves it to page variable
              */
-            function getAllItemsFromServer() {
-                pageCurrentItems = getItems();
+            function getAllItemsFromServerAndShowResult() {
+                pageCurrentItems = getItems(servletGetExistingItems, 'GET');
+                pageCurrentItems.sort(compareItems);
+                redrawItemsTable()
             }
 
+            /**
+             * Sends item to server, retrieves result and redraws table showing result.
+             */
+            function sendItemAndShowResult(item) {
+                let stored = sendItem(item, servletPostAddItem, 'POST');
+                pageCurrentItems = replaceOrAddItemIntoArray(pageCurrentItems, stored);
+                pageCurrentItems.sort(compareItems);
+                redrawItemsTable();
+            }
+
+            /**
+             * Sets page variable 'show all' value
+             */
             function setIsShowAllFlag(value) {
                 pageIsShowAllItems = value;
             }
@@ -198,14 +99,23 @@
                 );
             }
 
+            /**
+             * Clears task description text area.
+             */
             function clearNewItemDescriptionElement() {
                 $("#add-task-description").val('');
             }
 
+            /**
+             * Returns description written in the text area
+             */
             function getNewItemDescription() {
                 return $("#add-task-description").val();
             }
 
+            /**
+             * Returns item object
+             */
             function findCheckedItem(changedElement) {
                 let searchId = Number.parseInt(changedElement.name);
                 return pageCurrentItems.find(function (element) {
@@ -225,25 +135,30 @@
                 if (isWhiteSpaceOnly(description)) {
                     alert("Item description is empty!")
                 } else {
-                    sendItem(
-                        new Item(-1, description, created, false));
+                    let item = new Item(-1, description, created, false);
+                    sendItemAndShowResult(item);
                 }
                 clearNewItemDescriptionElement();
                 redrawItemsTable();
             });
 
+            /**
+             * Listener on <Enter> key to use it as "add task" button.
+             */
             $("#add-task-description").keyup(function (event) {
-                if (event.keyCode === 13 && !event.shiftKey) {
+                if (event.keyCode === 13) {
                     $("#add-task-submit").click();
                 }
             });
 
+            /**
+             * Listener on 'done' checkboxes in items table.
+             */
             $("#existing-items-table").on('change', "input", function () {
                 let item = findCheckedItem(this);
                 if (item !== undefined) {
                     item.done = this.checked;
-                    sendItem(item);
-                    redrawItemsTable();
+                    sendItemAndShowResult(item);
                 }
             });
 
@@ -258,7 +173,7 @@
             /* * * * * * * * * * * * * * *
              * OPERATIONS AFTER PAGE LOAD
              * * * * * * * * * * * * * * */
-            redrawItemsTable();
+            getAllItemsFromServerAndShowResult();
 
         });
     </script>

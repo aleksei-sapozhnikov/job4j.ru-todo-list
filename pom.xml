@@ -6,13 +6,21 @@
     <version>0.1</version>
     <name>todo-list</name>
 
+    <!-- General properties for all -->
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <liquibase.changeLogFile>target/classes/db/master.xml</liquibase.changeLogFile>
+        <liquibase.promptOnNonLocalDatabase>false</liquibase.promptOnNonLocalDatabase>
+        <liquibase.dropFirst>true</liquibase.dropFirst>
+        <hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</hibernate.sql.dialect>
     </properties>
 
     <profiles>
+        <!--
+          ** Profile to deploy on heroku.com
+        -->
         <profile>
             <id>heroku</id>
             <activation>
@@ -23,16 +31,76 @@
                 </property>
             </activation>
             <properties>
+                <!--
+                  ** These properties are parsed from Heroku environment variables
+                  ** using gmaven plugin
+                -->
                 <!--suppress UnresolvedMavenProperty -->
-                <db.url>${database.jdbcUrl}</db.url>
+                <db.url>${heroku.db.jdbcUrl}</db.url>
                 <!--suppress UnresolvedMavenProperty -->
-                <db.username>${database.username}</db.username>
+                <db.username>${heroku.db.username}</db.username>
                 <!--suppress UnresolvedMavenProperty -->
-                <db.password>${database.password}</db.password>
+                <db.password>${heroku.db.password}</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
-                <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
+            <build>
+                <plugins>
+                    <!--
+                      ** Liquibase will start separately after project build,
+                      ** iun the release phase (see Procfile).
+                      ** But we set all necessary properties for the run here.
+                    -->
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <version>3.6.3</version>
+                        <configuration>
+                            <propertyFile>target/classes/db/heroku.properties</propertyFile>
+                            <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
+                            <promptOnNonLocalDatabase>${liquibase.promptOnNonLocalDatabase}</promptOnNonLocalDatabase>
+                            <dropFirst>${liquibase.dropFirst}</dropFirst>
+                        </configuration>
+                    </plugin>
+                    <!--
+                      ** Parses jdbc url, username, password from Heroku environment variables.
+                      ** Script language is Groovy.
+                    -->
+                    <plugin>
+                        <groupId>org.codehaus.gmavenplus</groupId>
+                        <artifactId>gmavenplus-plugin</artifactId>
+                        <version>1.2</version>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <scripts>
+                                <script>
+                                    <![CDATA[
+                                        URI dbUri = new URI(System.getenv("DATABASE_URL"));
+                                        String username = dbUri.getUserInfo().split(":")[0];
+                                        String password = dbUri.getUserInfo().split(":")[1];
+                                        int port = dbUri.getPort();
+                                        String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
+                                        project.properties['heroku.db.jdbcUrl'] = dbUrl
+                                        project.properties['heroku.db.username'] = username
+                                        project.properties['heroku.db.password'] = password
+                                    ]]>
+                                </script>
+                            </scripts>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
+
+        <!--
+          ** Profile for local tests on testing database.
+        -->
         <profile>
             <id>test</id>
             <activation>
@@ -43,11 +111,36 @@
                 <db.username>tester</db.username>
                 <db.password>password</db.password>
                 <db.driver>org.postgresql.Driver</db.driver>
-                <db.hibernate.sql.dialect>org.hibernate.dialect.PostgreSQL95Dialect</db.hibernate.sql.dialect>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <version>3.6.3</version>
+                        <configuration>
+                            <propertyFile>target/classes/db/test.properties</propertyFile>
+                            <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
+                            <promptOnNonLocalDatabase>${liquibase.promptOnNonLocalDatabase}</promptOnNonLocalDatabase>
+                            <dropFirst>${liquibase.dropFirst}</dropFirst>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
+    <!--
+      ** Project dependencies.
+     -->
     <dependencies>
 
         <!--Testing-->
@@ -65,9 +158,29 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>2.0.2-beta</version>
+            <artifactId>mockito-core</artifactId>
+            <version>2.25.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>2.0.0</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy-agent</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--Servlet-->
@@ -96,13 +209,11 @@
         </dependency>
 
         <!-- Database -->
-        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
@@ -112,6 +223,13 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>5.4.1.Final</version>
+        </dependency>
+        <!--Database to use in tests-->
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.4.1</version>
+            <scope>test</scope>
         </dependency>
 
         <!--Logger-->
@@ -126,8 +244,7 @@
             <version>2.11.0</version>
         </dependency>
 
-        <!-- Library to parse JDBC_DATABASE_URL into Maven profile properties -->
-        <!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all -->
+        <!-- Library to parse Heroku env. variables Maven Heroku profile properties -->
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
@@ -135,9 +252,11 @@
             <type>pom</type>
         </dependency>
 
-
     </dependencies>
 
+    <!--
+      ** General build properties.
+    -->
     <build>
         <resources>
             <resource>
@@ -145,7 +264,15 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
+
+            <!-- Checkstyle -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -167,6 +294,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Without that maven uses TestNG and skips tests. Don't know why -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>3.0.0-M3</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- Test coverage: jacoco -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -186,6 +329,11 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--
+              ** Runner for web-application to launch it on heroku.
+              ** See also Procfile.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -208,6 +356,11 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--
+              ** Informational plugin: shows values of maven variables
+              ** during project build.
+            -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -222,59 +375,13 @@
                                 <echo>db.username: ${db.username}</echo>
                                 <echo>db.password: ${db.password}</echo>
                                 <echo>db.driver: ${db.driver}</echo>
-                                <echo>db.hibernate.sql.dialect.: ${db.hibernate.sql.dialect}</echo>
+                                <echo>hibernate.sql.dialect.: ${hibernate.sql.dialect}</echo>
                             </tasks>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <scripts>
-                        <script>
-                            <![CDATA[
-                            if (System.getenv("DATABASE_URL") != null) {
-                                URI dbUri = new URI(System.getenv("DATABASE_URL"));
-                                String username = dbUri.getUserInfo().split(":")[0];
-                                String password = dbUri.getUserInfo().split(":")[1];
-                                int port = dbUri.getPort();
-                                String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
-                                project.properties['database.jdbcUrl'] = dbUrl
-                                project.properties['database.username'] = username
-                                project.properties['database.password'] = password
-                            }
-                            ]]>
-                        </script>
-                    </scripts>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>3.6.3</version>
-                <configuration>
-                    <changeLogFile>${basedir}/target/classes/db/master.xml</changeLogFile>
-                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                    <url>${db.url}</url>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <url>${env.JDBC_DATABASE_URL}</url>
-                    <driver>${db.driver}</driver>
-                    <username>${db.username}</username>
-                    <password>${db.password}</password>
-                    <dropFirst>true</dropFirst>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 </project>
