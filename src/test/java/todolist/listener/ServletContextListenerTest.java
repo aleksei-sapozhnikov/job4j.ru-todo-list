@@ -2,7 +2,9 @@ package todolist.listener;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
 import todolist.constants.ContextAttrs;
+import todolist.persistence.ItemDatabaseStorage;
 import todolist.persistence.ItemStorage;
 
 import javax.servlet.ServletContext;
@@ -22,11 +24,17 @@ public class ServletContextListenerTest {
 
     @Test
     public void whenContextInitializedThenStorageSetAsParameter() {
+        // do bad thing
+        Whitebox.setInternalState(ItemDatabaseStorage.class, "instance", this.storage);
+
         when(this.contextEvent.getServletContext()).thenReturn(this.context);
         new ServletContextListener().contextInitialized(contextEvent);
         verify(this.context).setAttribute(
                 eq(ContextAttrs.STORAGE.v()),
                 any(ItemStorage.class));
+
+        // clear bad thing
+        Whitebox.setInternalState(ItemDatabaseStorage.class, "instance", (ItemStorage) null);
     }
 
     @Test
