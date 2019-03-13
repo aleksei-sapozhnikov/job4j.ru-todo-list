@@ -1,7 +1,12 @@
 package todolist.persistence;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.junit.After;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
 import todolist.model.Item;
 import todolist.model.TaskBean;
 
@@ -9,10 +14,11 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
 public class ItemDatabaseStorageTest {
 
-    private final ItemDatabaseStorage storage = ItemDatabaseStorage.INSTANCE;
+    private final ItemStorage storage = ItemDatabaseStorage.getInstance();
 
     private TaskBean createItem(int id, String description, long created, boolean done) {
         var item = new Item();
@@ -29,7 +35,7 @@ public class ItemDatabaseStorageTest {
 
     @After
     public void clearTable() {
-        this.storage.clear();
+        ((ItemDatabaseStorage) this.storage).clear();
     }
 
     @Test
@@ -92,5 +98,53 @@ public class ItemDatabaseStorageTest {
         assertThat(description, org.hamcrest.Matchers.containsInAnyOrder("item2", "item3", "item4"));
         assertThat(created, org.hamcrest.Matchers.containsInAnyOrder(234L, 456L, 987L));
         assertThat(done, org.hamcrest.Matchers.containsInAnyOrder(true, false, false));
+    }
+
+    @Test
+    public void whenAutoClosedThenInnerSessionFactoryClosed() throws Exception {
+        var mockFactory = Mockito.mock(SessionFactory.class);
+
+        // do bad things
+        var realFactory = Whitebox.getInternalState(this.storage, "factory");
+        Whitebox.setInternalState(this.storage, "factory", mockFactory);
+
+        // do checks
+        this.storage.close();
+        verify(mockFactory).close();
+
+        // clear bad thing
+        Whitebox.setInternalState(this.storage, "factory", realFactory);
+    }
+
+    @Test
+    public void whenExceptionThenTransactionRollback() {
+        var factory = Mockito.mock(SessionFactory.class);
+        var session = Mockito.mock(Session.class);
+        var transaction = Mockito.mock(Transaction.class);
+        var searchBean = Mockito.mock(TaskBean.class);
+        var resultBean = Mockito.mock(TaskBean.class);
+        when(factory.openSession()).thenReturn(session);
+        when(session.beginTransaction()).thenReturn(transaction);
+        when(searchBean.getId()).thenReturn(5);
+        when(session.get(TaskBean.class, 5)).thenReturn(resultBean);
+        doThrow(new RuntimeException("We expected that!")).when(transaction).commit();
+
+        // do bad things
+        var realFactory = Whitebox.getInternalState(this.storage, "factory");
+        Whitebox.setInternalState(this.storage, "factory", factory);
+
+        // do checks
+        String msg = null;
+        try {
+            // operation doesn't matter
+            this.storage.get(searchBean);
+        } catch (Exception e) {
+            msg = e.getMessage();
+        }
+        assertEquals("We expected that!", msg);
+        verify(transaction).rollback();
+
+        // clear bad thing
+        Whitebox.setInternalState(this.storage, "factory", realFactory);
     }
 }

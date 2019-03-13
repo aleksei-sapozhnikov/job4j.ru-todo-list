@@ -18,8 +18,28 @@ import java.util.function.Function;
  * @version 0.1
  * @since 0.1
  */
-public enum ItemDatabaseStorage implements ItemStorage {
-    INSTANCE;
+public class ItemDatabaseStorage implements ItemStorage {
+
+    /**
+     * Instance variable.
+     */
+    private static volatile ItemStorage instance;
+
+    /**
+     * Double-checked locking getter.
+     *
+     * @return Singleton instance.
+     */
+    public static ItemStorage getInstance() {
+        if (instance == null) {
+            synchronized (ItemDatabaseStorage.class) {
+                if (instance == null) {
+                    instance = new ItemDatabaseStorage();
+                }
+            }
+        }
+        return instance;
+    }
 
     /**
      * Logger.

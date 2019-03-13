@@ -31,7 +31,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
     public void contextInitialized(ServletContextEvent sce) {
         sce.getServletContext().setAttribute(
                 ContextAttrs.STORAGE.v(),
-                ItemDatabaseStorage.INSTANCE);
+                ItemDatabaseStorage.getInstance());
     }
 
     /**
