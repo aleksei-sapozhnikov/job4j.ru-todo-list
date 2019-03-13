@@ -97,8 +97,13 @@ public enum ItemDatabaseStorage implements ItemStorage {
         T result;
         try (final var session = this.factory.openSession()) {
             var transaction = session.beginTransaction();
-            result = operations.apply(session);
-            transaction.commit();
+            try {
+                result = operations.apply(session);
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+                throw e;
+            }
         }
         return result;
     }
