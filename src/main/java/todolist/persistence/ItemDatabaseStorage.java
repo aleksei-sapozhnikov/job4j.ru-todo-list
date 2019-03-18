@@ -55,7 +55,7 @@ public class ItemDatabaseStorage implements ItemStorage {
     /**
      * Constructor.
      */
-    ItemDatabaseStorage() {
+    private ItemDatabaseStorage() {
         this.factory = new Configuration().configure().buildSessionFactory();
     }
 
