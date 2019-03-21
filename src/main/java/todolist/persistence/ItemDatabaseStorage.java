@@ -97,16 +97,6 @@ public class ItemDatabaseStorage implements ItemStorage {
     }
 
     /**
-     * Clears table with entities.
-     * Not part of interface.
-     * For test purposes only.
-     */
-    void clear() {
-        this.performTransaction(
-                session -> session.createQuery("delete from Item").executeUpdate());
-    }
-
-    /**
      * Performs transaction: creates session, performs given operations, commits and closes.
      *
      * @param operations Function: operations to perform.
