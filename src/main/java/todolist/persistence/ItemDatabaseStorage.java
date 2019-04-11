@@ -55,7 +55,7 @@ public class ItemDatabaseStorage implements ItemStorage {
     /**
      * Constructor.
      */
-    ItemDatabaseStorage() {
+    private ItemDatabaseStorage() {
         this.factory = new Configuration().configure().buildSessionFactory();
     }
 
@@ -94,16 +94,6 @@ public class ItemDatabaseStorage implements ItemStorage {
     public List<TaskBean> getAll() {
         return this.performTransaction(
                 session -> session.createQuery("from Item").list());
-    }
-
-    /**
-     * Clears table with entities.
-     * Not part of interface.
-     * For test purposes only.
-     */
-    void clear() {
-        this.performTransaction(
-                session -> session.createQuery("delete from Item").executeUpdate());
     }
 
     /**
