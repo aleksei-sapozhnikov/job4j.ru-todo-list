@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/vermucht/todo_list.svg?branch=master)](https://travis-ci.org/vermucht/todo-list)
-[![codecov](https://codecov.io/gh/vermucht/todo_list/branch/master/graph/badge.svg)](https://codecov.io/gh/vermucht/todo-list)
+[![Build Status](https://travis-ci.org/vermucht/todo-list.svg?branch=master)](https://travis-ci.org/vermucht/todo-list)
+[![codecov](https://codecov.io/gh/vermucht/todo-list/branch/master/graph/badge.svg)](https://codecov.io/gh/vermucht/todo-list)
 # ToDo list service
 
 Задание: необходимо создать простое приложение TODO-list.
