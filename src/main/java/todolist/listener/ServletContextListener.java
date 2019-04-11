@@ -6,6 +6,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import todolist.constants.ContextAttrs;
 import todolist.persistence.ItemDatabaseStorage;
+import todolist.persistence.UserDbStorage;
 
 import javax.servlet.ServletContextEvent;
 
@@ -37,6 +38,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
         this.hbFactory = new Configuration().configure().buildSessionFactory();
         var ctx = sce.getServletContext();
         ctx.setAttribute(ContextAttrs.ITEM_STORAGE.v(), new ItemDatabaseStorage(this.hbFactory));
+        ctx.setAttribute(ContextAttrs.USER_STORAGE.v(), new UserDbStorage(this.hbFactory));
     }
 
     /**

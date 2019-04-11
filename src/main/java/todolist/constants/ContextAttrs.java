@@ -8,7 +8,8 @@ package todolist.constants;
  * @since 0.1
  */
 public enum ContextAttrs {
-    ITEM_STORAGE("itemStorage");
+    ITEM_STORAGE("itemStorage"),
+    USER_STORAGE("userStorage");
 
     /**
      * Value holder.

@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.powermock.reflect.Whitebox;
 import todolist.constants.ContextAttrs;
 import todolist.persistence.ItemStorage;
+import todolist.persistence.UserDbStorage;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -28,6 +29,7 @@ public class ServletContextListenerTest {
         when(this.contextEvent.getServletContext()).thenReturn(this.context);
         new ServletContextListener().contextInitialized(contextEvent);
         verify(this.context).setAttribute(eq(ContextAttrs.ITEM_STORAGE.v()), any(ItemStorage.class));
+        verify(this.context).setAttribute(eq(ContextAttrs.USER_STORAGE.v()), any(UserDbStorage.class));
     }
 
     @Test
