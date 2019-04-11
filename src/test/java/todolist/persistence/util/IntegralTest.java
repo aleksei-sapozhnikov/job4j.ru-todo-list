@@ -10,9 +10,9 @@ import org.hibernate.cfg.Configuration;
  * @version 0.1
  * @since 0.1
  */
-public interface IntegralTest {
+public class IntegralTest {
     /**
      * Rollback session factory.
      */
-    SessionFactory hbFactory = new Configuration().configure().buildSessionFactory();
+    protected final SessionFactory hbFactory = new Configuration().configure().buildSessionFactory();
 }

@@ -18,9 +18,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class ItemDatabaseStorageTest implements IntegralTest {
+public class ItemDatabaseStorageTest extends IntegralTest {
 
-    private final ItemStorage storage = new ItemDatabaseStorage(IntegralTest.hbFactory);
+    private final ItemStorage storage = new ItemDatabaseStorage(this.hbFactory);
 
     private TaskBean createItem(int id, String description, long created, boolean done) {
         var item = new Item();
