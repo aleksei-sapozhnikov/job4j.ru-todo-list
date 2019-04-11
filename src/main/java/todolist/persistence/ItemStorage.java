@@ -4,7 +4,7 @@ import todolist.model.TaskBean;
 
 import java.util.List;
 
-public interface ItemStorage extends AutoCloseable {
+public interface ItemStorage {
 
     /**
      * Finds item by id and return Item object.

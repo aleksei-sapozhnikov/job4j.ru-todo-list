@@ -35,6 +35,10 @@ public class Item implements TaskBean {
      * Flag 'done'/'not done'.
      */
     private boolean done;
+    /**
+     * User who created this item.
+     */
+    private User user;
 
     /* * * * * * * * * * * * * *
      * OBJECT UTILITY METHODS  *
@@ -160,5 +164,24 @@ public class Item implements TaskBean {
     @Override
     public void setDone(boolean done) {
         this.done = done;
+    }
+
+    /**
+     * Returns user.
+     *
+     * @return Value of user field.
+     */
+    public User getUser() {
+        return this.user;
+    }
+
+    /**
+     * Sets user value.
+     *
+     * @param user Value to set.
+     */
+    public Item setUser(User user) {
+        this.user = user;
+        return this;
     }
 }

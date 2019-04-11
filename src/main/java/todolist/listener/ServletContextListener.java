@@ -2,9 +2,10 @@ package todolist.listener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import todolist.constants.ContextAttrs;
 import todolist.persistence.ItemDatabaseStorage;
-import todolist.persistence.ItemStorage;
 
 import javax.servlet.ServletContextEvent;
 
@@ -21,6 +22,10 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
      */
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(ServletContextListener.class);
+    /**
+     * Hibernate factory - to close on application close.
+     */
+    private SessionFactory hbFactory;
 
     /**
      * Opens and adds resources to ServletContext on application start.
@@ -29,9 +34,9 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        sce.getServletContext().setAttribute(
-                ContextAttrs.STORAGE.v(),
-                ItemDatabaseStorage.getInstance());
+        this.hbFactory = new Configuration().configure().buildSessionFactory();
+        var ctx = sce.getServletContext();
+        ctx.setAttribute(ContextAttrs.ITEM_STORAGE.v(), new ItemDatabaseStorage(this.hbFactory));
     }
 
     /**
@@ -41,10 +46,8 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
      */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        var storage = (ItemStorage) sce.getServletContext()
-                .getAttribute(ContextAttrs.STORAGE.v());
         try {
-            storage.close();
+            this.hbFactory.close();
         } catch (Exception e) {
             var re = new RuntimeException("Unexpected exception on resource close");
             re.addSuppressed(e);

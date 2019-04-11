@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import todolist.model.Item;
 import todolist.model.TaskBean;
 
@@ -19,28 +18,6 @@ import java.util.function.Function;
  * @since 0.1
  */
 public class ItemDatabaseStorage implements ItemStorage {
-
-    /**
-     * Instance variable.
-     */
-    private static volatile ItemStorage instance;
-
-    /**
-     * Double-checked locking getter.
-     *
-     * @return Singleton instance.
-     */
-    public static ItemStorage getInstance() {
-        if (instance == null) {
-            synchronized (ItemDatabaseStorage.class) {
-                if (instance == null) {
-                    instance = new ItemDatabaseStorage();
-                }
-            }
-        }
-        return instance;
-    }
-
     /**
      * Logger.
      */
@@ -55,8 +32,8 @@ public class ItemDatabaseStorage implements ItemStorage {
     /**
      * Constructor.
      */
-    private ItemDatabaseStorage() {
-        this.factory = new Configuration().configure().buildSessionFactory();
+    public ItemDatabaseStorage(SessionFactory factory) {
+        this.factory = factory;
     }
 
     /**
@@ -97,6 +74,19 @@ public class ItemDatabaseStorage implements ItemStorage {
     }
 
     /**
+     * Returns all items associated with given user id.
+     *
+     * @return List of Item objects.
+     */
+    @SuppressWarnings("unchecked")
+    public List<TaskBean> getForUser(long userId) {
+        return this.performTransaction(
+                session -> session.createQuery("from Item i where i.user.id = :userId")
+                        .setParameter("userId", userId)
+                        .list());
+    }
+
+    /**
      * Performs transaction: creates session, performs given operations, commits and closes.
      *
      * @param operations Function: operations to perform.
@@ -118,11 +108,4 @@ public class ItemDatabaseStorage implements ItemStorage {
         return result;
     }
 
-    /**
-     * Closes resources.
-     */
-    @Override
-    public void close() {
-        this.factory.close();
-    }
 }

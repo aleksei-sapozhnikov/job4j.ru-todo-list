@@ -36,6 +36,15 @@ public class User {
      */
     private Set<Item> items = new HashSet<>();
 
+    //////////////////////////////////
+    // custom methods to add elements
+    //////////////////////////////////
+
+    public void addItem(Item item) {
+        this.items.add(item);
+        item.setUser(this);
+    }
+
     /////////////////////////
     // getters and setters
     /////////////////////////

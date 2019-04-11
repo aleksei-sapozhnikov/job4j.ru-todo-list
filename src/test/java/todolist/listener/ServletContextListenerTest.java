@@ -1,10 +1,10 @@
 package todolist.listener;
 
+import org.hibernate.SessionFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.reflect.Whitebox;
 import todolist.constants.ContextAttrs;
-import todolist.persistence.ItemDatabaseStorage;
 import todolist.persistence.ItemStorage;
 
 import javax.servlet.ServletContext;
@@ -21,38 +21,31 @@ public class ServletContextListenerTest {
 
     private final ServletContextEvent contextEvent = mock(ServletContextEvent.class);
     private final ServletContext context = mock(ServletContext.class);
+    private final SessionFactory hbFactory = mock(SessionFactory.class);
 
     @Test
     public void whenContextInitializedThenStorageSetAsParameter() {
-        // do bad thing
-        Whitebox.setInternalState(ItemDatabaseStorage.class, "instance", this.storage);
-
         when(this.contextEvent.getServletContext()).thenReturn(this.context);
         new ServletContextListener().contextInitialized(contextEvent);
-        verify(this.context).setAttribute(
-                eq(ContextAttrs.STORAGE.v()),
-                any(ItemStorage.class));
-
-        // clear bad thing
-        Whitebox.setInternalState(ItemDatabaseStorage.class, "instance", (ItemStorage) null);
+        verify(this.context).setAttribute(eq(ContextAttrs.ITEM_STORAGE.v()), any(ItemStorage.class));
     }
 
     @Test
-    public void whenContextDestroyedThenStorageClosed() throws Exception {
-        when(this.contextEvent.getServletContext()).thenReturn(this.context);
-        when(this.context.getAttribute(ContextAttrs.STORAGE.v())).thenReturn(this.storage);
-        new ServletContextListener().contextDestroyed(contextEvent);
-        verify(this.storage).close();
+    public void whenContextDestroyedThenStorageClosed() {
+        var listener = new ServletContextListener();
+        Whitebox.setInternalState(listener, "hbFactory", this.hbFactory);
+        listener.contextDestroyed(this.contextEvent);
+        verify(this.hbFactory).close();
     }
 
     @Test
-    public void whenStorageThrowsExceptionOnCloseThenRuntimeExceptionThrownWithSuppressed() throws Exception {
-        when(this.contextEvent.getServletContext()).thenReturn(this.context);
-        when(this.context.getAttribute(ContextAttrs.STORAGE.v())).thenReturn(this.storage);
-        Mockito.doThrow(new Exception("On close")).when(this.storage).close();
+    public void whenStorageThrowsExceptionOnCloseThenRuntimeExceptionThrownWithSuppressed() {
+        var listener = new ServletContextListener();
+        Whitebox.setInternalState(listener, "hbFactory", this.hbFactory);
+        Mockito.doThrow(new RuntimeException("On close")).when(this.hbFactory).close();
         Throwable caught = null;
         try {
-            new ServletContextListener().contextDestroyed(contextEvent);
+            listener.contextDestroyed(this.contextEvent);
         } catch (RuntimeException re) {
             caught = re;
         }

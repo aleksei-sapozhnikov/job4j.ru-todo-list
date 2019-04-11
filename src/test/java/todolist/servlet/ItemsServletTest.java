@@ -45,7 +45,7 @@ public class ItemsServletTest {
     @Before
     public void initContext() {
         when(this.context
-                .getAttribute(ContextAttrs.STORAGE.v()))
+                .getAttribute(ContextAttrs.ITEM_STORAGE.v()))
                 .thenReturn(this.storage);
     }
 
@@ -53,7 +53,7 @@ public class ItemsServletTest {
     public void whenInitThenStorageTakenFromServletContext() {
         this.testServlet.init();
         Mockito.verify(this.context)
-                .getAttribute(ContextAttrs.STORAGE.v());
+                .getAttribute(ContextAttrs.ITEM_STORAGE.v());
     }
 
     @Test

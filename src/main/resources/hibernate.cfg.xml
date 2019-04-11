@@ -10,7 +10,7 @@
         <property name="hibernate.connection.username">${db.username}</property>
         <property name="hibernate.connection.password">${db.password}</property>
 
-        <property name="hbm2ddl.auto">create-drop</property>
+        <!--<property name="hbm2ddl.auto">create-drop</property>-->
 
         <!-- List of XML mapping files -->
         <mapping resource="todolist/model/Item.hbm.xml"/>

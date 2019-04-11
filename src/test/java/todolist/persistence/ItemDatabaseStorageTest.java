@@ -8,18 +8,19 @@ import org.mockito.Mockito;
 import org.powermock.reflect.Whitebox;
 import todolist.model.Item;
 import todolist.model.TaskBean;
+import todolist.persistence.util.IntegralTest;
 import todolist.persistence.util.RollbackProxy;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class ItemDatabaseStorageTest {
+public class ItemDatabaseStorageTest implements IntegralTest {
 
-    private final ItemStorage storage = ItemDatabaseStorage.getInstance();
-    private final SessionFactory storageFactory = Whitebox.getInternalState(this.storage, "factory");
+    private final ItemStorage storage = new ItemDatabaseStorage(IntegralTest.hbFactory);
 
     private TaskBean createItem(int id, String description, long created, boolean done) {
         var item = new Item();
@@ -34,58 +35,57 @@ public class ItemDatabaseStorageTest {
         return this.createItem(0, description, created, done);
     }
 
-    private void doIntegralTestWithRollback(Runnable operations) {
-        try (var factory = RollbackProxy.create(this.storageFactory);
-             var session = factory.openSession()
-        ) {
-            // do bad things
-            Whitebox.setInternalState(this.storage, "factory", factory);
-            operations.run();
-            session.clear();
-            // clear bad things
-            Whitebox.setInternalState(this.storage, "factory", this.storageFactory);
+    /**
+     * Do integral test with rollback.
+     *
+     * @param operations Test operations.
+     */
+    private void doIntegralTestWithRollback(Consumer<ItemDatabaseStorage> operations) {
+        try (var factory = RollbackProxy.create(hbFactory)) {
+            var storage = new ItemDatabaseStorage(factory);
+            operations.accept(storage);
         }
     }
 
     @Test
     public void whenMergeItemWithNewIdThenItemAdded() {
-        this.doIntegralTestWithRollback(() -> {
+        this.doIntegralTestWithRollback((storage) -> {
             var toAdd = this.createItem("item one", 123, true);
-            var added = this.storage.merge(toAdd);
+            var added = storage.merge(toAdd);
             assertEquals(added.getDescription(), toAdd.getDescription());
             assertEquals(added.getCreated(), toAdd.getCreated());
             assertEquals(added.isDone(), toAdd.isDone());
-            assertEquals(this.storage.getAll().size(), 1);
+            assertEquals(storage.getAll().size(), 1);
         });
     }
 
     @Test
     public void whenMergeItemWithExistingIdThenItemUpdated() {
-        this.doIntegralTestWithRollback(() -> {
+        this.doIntegralTestWithRollback((storage) -> {
             var toAdd = this.createItem("item", 123, true);
-            var added = this.storage.merge(toAdd);
+            var added = storage.merge(toAdd);
             var toUpdate = this.createItem(added.getId(), "updated item", 567, false);
-            var updated = this.storage.merge(toUpdate);
+            var updated = storage.merge(toUpdate);
             assertEquals(updated.getId(), added.getId());
             assertEquals(updated.getDescription(), toUpdate.getDescription());
             assertEquals(updated.getCreated(), toUpdate.getCreated());
             assertEquals(updated.isDone(), toUpdate.isDone());
-            assertEquals(this.storage.getAll().size(), 1);
+            assertEquals(storage.getAll().size(), 1);
         });
     }
 
     @Test
     public void whenSearchItemThenItemFound() {
-        this.doIntegralTestWithRollback(() -> {
+        this.doIntegralTestWithRollback((storage) -> {
             var toAdd = this.createItem("item", 123, true);
-            var added = this.storage.merge(toAdd);
-            this.storage.merge(this.createItem("item2", 234, false));
-            this.storage.merge(this.createItem("item3", 456, true));
-            assertEquals(this.storage.getAll().size(), 3);
+            var added = storage.merge(toAdd);
+            storage.merge(this.createItem("item2", 234, false));
+            storage.merge(this.createItem("item3", 456, true));
+            assertEquals(storage.getAll().size(), 3);
             //
             var search = new Item();
             search.setId(added.getId());
-            var found = this.storage.get(search);
+            var found = storage.get(search);
             assertEquals(found.getId(), added.getId());
             assertEquals(found.getDescription(), added.getDescription());
             assertEquals(found.getCreated(), added.getCreated());
@@ -95,11 +95,11 @@ public class ItemDatabaseStorageTest {
 
     @Test
     public void whenGetAllThenAllItemsReturned() {
-        this.doIntegralTestWithRollback(() -> {
-            this.storage.merge(this.createItem("item2", 234, false));
-            this.storage.merge(this.createItem("item3", 456, true));
-            this.storage.merge(this.createItem("item4", 987, false));
-            var all = this.storage.getAll();
+        this.doIntegralTestWithRollback((storage) -> {
+            storage.merge(this.createItem("item2", 234, false));
+            storage.merge(this.createItem("item3", 456, true));
+            storage.merge(this.createItem("item4", 987, false));
+            var all = storage.getAll();
             var size = all.size();
             assertEquals(all.size(), size);
             //
@@ -115,22 +115,6 @@ public class ItemDatabaseStorageTest {
             assertThat(created, org.hamcrest.Matchers.containsInAnyOrder(234L, 456L, 987L));
             assertThat(done, org.hamcrest.Matchers.containsInAnyOrder(true, false, false));
         });
-    }
-
-    @Test
-    public void whenAutoClosedThenInnerSessionFactoryClosed() throws Exception {
-        var mockFactory = Mockito.mock(SessionFactory.class);
-
-        // do bad things
-        var realFactory = Whitebox.getInternalState(this.storage, "factory");
-        Whitebox.setInternalState(this.storage, "factory", mockFactory);
-
-        // do checks
-        this.storage.close();
-        verify(mockFactory).close();
-
-        // clear bad thing
-        Whitebox.setInternalState(this.storage, "factory", realFactory);
     }
 
     @Test
