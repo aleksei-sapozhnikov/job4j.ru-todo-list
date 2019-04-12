@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import todolist.model.Item;
-import todolist.model.TaskBean;
 
 import java.util.List;
 import java.util.function.Function;
@@ -17,12 +16,12 @@ import java.util.function.Function;
  * @version 0.1
  * @since 0.1
  */
-public class ItemDatabaseStorage implements ItemStorage {
+public class ItemDbStorage {
     /**
      * Logger.
      */
     @SuppressWarnings("unused")
-    static final Logger LOG = LogManager.getLogger(ItemDatabaseStorage.class);
+    static final Logger LOG = LogManager.getLogger(ItemDbStorage.class);
 
     /**
      * Hibernate session factory to store items.
@@ -32,33 +31,31 @@ public class ItemDatabaseStorage implements ItemStorage {
     /**
      * Constructor.
      */
-    public ItemDatabaseStorage(SessionFactory factory) {
+    public ItemDbStorage(SessionFactory factory) {
         this.factory = factory;
     }
 
     /**
      * Finds item by id and return Item object.
      *
-     * @param task Item object with search information (id).
+     * @param item Item object with search information (id).
      * @return Item with given id from database.
      */
-    @Override
-    public TaskBean get(TaskBean task) {
+    public Item get(Item item) {
         return this.performTransaction(
-                session -> session.get(Item.class, task.getId()));
+                session -> session.get(Item.class, item.getId()));
     }
 
     /**
      * If id of given item found in database, updates item.
      * Otherwise adds given item to database with id given by database.
      *
-     * @param task Item to store or to use as update.
+     * @param item Item to store or to use as update.
      * @return Item object stored in database, with id given by database.
      */
-    @Override
-    public TaskBean merge(TaskBean task) {
+    public Item merge(Item item) {
         return this.performTransaction(
-                session -> (TaskBean) session.merge(task));
+                session -> (Item) session.merge(item));
     }
 
     /**
@@ -66,9 +63,8 @@ public class ItemDatabaseStorage implements ItemStorage {
      *
      * @return List of Item objects.
      */
-    @Override
     @SuppressWarnings("unchecked")
-    public List<TaskBean> getAll() {
+    public List<Item> getAll() {
         return this.performTransaction(
                 session -> session.createQuery("from Item").list());
     }
@@ -79,7 +75,7 @@ public class ItemDatabaseStorage implements ItemStorage {
      * @return List of Item objects.
      */
     @SuppressWarnings("unchecked")
-    public List<TaskBean> getForUser(long userId) {
+    public List<Item> getForUser(long userId) {
         return this.performTransaction(
                 session -> session.createQuery("from Item i where i.user.id = :userId")
                         .setParameter("userId", userId)

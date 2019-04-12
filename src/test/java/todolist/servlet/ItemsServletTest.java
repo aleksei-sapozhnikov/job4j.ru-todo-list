@@ -6,8 +6,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import todolist.constants.ContextAttrs;
 import todolist.model.Item;
-import todolist.model.TaskBean;
-import todolist.persistence.ItemStorage;
+import todolist.persistence.ItemDbStorage;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.when;
 
 public class ItemsServletTest {
 
-    private final ItemStorage storage = mock(ItemStorage.class);
+    private final ItemDbStorage storage = mock(ItemDbStorage.class);
     private final HttpServletRequest request = mock(HttpServletRequest.class);
     private final HttpServletResponse response = mock(HttpServletResponse.class);
     private final ServletContext context = mock(ServletContext.class);
@@ -33,7 +32,7 @@ public class ItemsServletTest {
         }
     };
 
-    private TaskBean createItem(int id, String description, long created, boolean done) {
+    private Item createItem(int id, String description, long created, boolean done) {
         var item = new Item();
         item.setId(id);
         item.setDescription(description);

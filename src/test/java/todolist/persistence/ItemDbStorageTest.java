@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.reflect.Whitebox;
 import todolist.model.Item;
-import todolist.model.TaskBean;
 import todolist.persistence.util.IntegralTest;
 import todolist.persistence.util.RollbackProxy;
 
@@ -18,11 +17,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class ItemDatabaseStorageTest extends IntegralTest {
+public class ItemDbStorageTest extends IntegralTest {
 
-    private final ItemStorage storage = new ItemDatabaseStorage(this.hbFactory);
+    private final ItemDbStorage storage = new ItemDbStorage(this.hbFactory);
 
-    private TaskBean createItem(int id, String description, long created, boolean done) {
+    private Item createItem(int id, String description, long created, boolean done) {
         var item = new Item();
         item.setId(id);
         item.setDescription(description);
@@ -31,7 +30,7 @@ public class ItemDatabaseStorageTest extends IntegralTest {
         return item;
     }
 
-    private TaskBean createItem(String description, long created, boolean done) {
+    private Item createItem(String description, long created, boolean done) {
         return this.createItem(0, description, created, done);
     }
 
@@ -40,9 +39,9 @@ public class ItemDatabaseStorageTest extends IntegralTest {
      *
      * @param operations Test operations.
      */
-    private void doIntegralTestWithRollback(Consumer<ItemDatabaseStorage> operations) {
+    private void doIntegralTestWithRollback(Consumer<ItemDbStorage> operations) {
         try (var factory = RollbackProxy.create(hbFactory)) {
-            var storage = new ItemDatabaseStorage(factory);
+            var storage = new ItemDbStorage(factory);
             operations.accept(storage);
         }
     }
@@ -122,12 +121,12 @@ public class ItemDatabaseStorageTest extends IntegralTest {
         var factory = Mockito.mock(SessionFactory.class);
         var session = Mockito.mock(Session.class);
         var transaction = Mockito.mock(Transaction.class);
-        var searchBean = Mockito.mock(TaskBean.class);
-        var resultBean = Mockito.mock(TaskBean.class);
+        var searchBean = Mockito.mock(Item.class);
+        var resultBean = Mockito.mock(Item.class);
         when(factory.openSession()).thenReturn(session);
         when(session.beginTransaction()).thenReturn(transaction);
         when(searchBean.getId()).thenReturn(5);
-        when(session.get(TaskBean.class, 5)).thenReturn(resultBean);
+        when(session.get(Item.class, 5)).thenReturn(resultBean);
         doThrow(new RuntimeException("We expected that!")).when(transaction).commit();
 
         // do bad things

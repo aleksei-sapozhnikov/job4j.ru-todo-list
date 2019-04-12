@@ -4,8 +4,7 @@ import com.google.gson.Gson;
 import todolist.constants.ContextAttrs;
 import todolist.constants.HttpCodes;
 import todolist.model.Item;
-import todolist.model.TaskBean;
-import todolist.persistence.ItemStorage;
+import todolist.persistence.ItemDbStorage;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,14 +22,14 @@ public class ItemsServlet extends HttpServlet {
     /**
      * Storage of items.
      */
-    private ItemStorage storage;
+    private ItemDbStorage storage;
 
     /**
      * Inits servlet-used objects.
      */
     @Override
     public void init() {
-        this.storage = (ItemStorage) this.getServletContext()
+        this.storage = (ItemDbStorage) this.getServletContext()
                 .getAttribute(ContextAttrs.ITEM_STORAGE.v());
     }
 
@@ -62,7 +61,7 @@ public class ItemsServlet extends HttpServlet {
              var writer = resp.getWriter()
         ) {
             var gson = new Gson();
-            TaskBean item = gson.fromJson(reader, Item.class);
+            Item item = gson.fromJson(reader, Item.class);
             item = this.storage.merge(item);
             gson.toJson(item, writer);
         }
