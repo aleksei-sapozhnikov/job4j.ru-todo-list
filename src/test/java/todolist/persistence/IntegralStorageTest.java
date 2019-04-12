@@ -160,51 +160,21 @@ public class IntegralStorageTest {
     }
 
     @Test
-    public void whenExceptionInItemDbStorageThenTransactionRollback() {
+    public void whenExceptionThenTransactionRollback() {
         // mocks
         var factory = Mockito.mock(SessionFactory.class);
         var session = Mockito.mock(Session.class);
         var transaction = Mockito.mock(Transaction.class);
-        var itemSearch = Mockito.mock(Item.class);
-        var itemResult = Mockito.mock(Item.class);
         when(factory.openSession()).thenReturn(session);
         when(session.beginTransaction()).thenReturn(transaction);
-        when(itemSearch.getId()).thenReturn(5);
-        when(session.get(Item.class, 5)).thenReturn(itemResult);
         doThrow(new RuntimeException("We expected that!")).when(transaction).commit();
         // actions
-        var storage = new ItemDbStorage(factory);
+        var storage = new AbstractDbStorage(factory) {
+        };
         String msg = null;
         try {
             // operation doesn't matter
-            storage.get(itemSearch);
-        } catch (Exception e) {
-            msg = e.getMessage();
-        }
-        // verify
-        assertEquals("We expected that!", msg);
-        verify(transaction).rollback();
-    }
-
-    @Test
-    public void whenExceptionInUserDbStorageThenTransactionRollback() {
-        // mocks
-        var factory = Mockito.mock(SessionFactory.class);
-        var session = Mockito.mock(Session.class);
-        var transaction = Mockito.mock(Transaction.class);
-        var userSearch = Mockito.mock(User.class);
-        var userResult = Mockito.mock(User.class);
-        when(factory.openSession()).thenReturn(session);
-        when(session.beginTransaction()).thenReturn(transaction);
-        when(userSearch.getId()).thenReturn(5L);
-        when(session.get(User.class, 5)).thenReturn(userResult);
-        doThrow(new RuntimeException("We expected that!")).when(transaction).commit();
-        // actions
-        var storage = new UserDbStorage(factory);
-        String msg = null;
-        try {
-            // operation doesn't matter
-            storage.merge(userSearch);
+            storage.performTransaction(ses -> "some result");
         } catch (Exception e) {
             msg = e.getMessage();
         }

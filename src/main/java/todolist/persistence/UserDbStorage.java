@@ -2,11 +2,8 @@ package todolist.persistence;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import todolist.model.User;
-
-import java.util.function.Function;
 
 /**
  * User database storage.
@@ -15,16 +12,12 @@ import java.util.function.Function;
  * @version 0.1
  * @since 0.1
  */
-public class UserDbStorage {
+public class UserDbStorage extends AbstractDbStorage {
     /**
      * Logger.
      */
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(UserDbStorage.class);
-    /**
-     * Hibernate session factory.
-     */
-    private final SessionFactory hbFactory;
 
     /**
      * Constructs user storage object.
@@ -32,7 +25,7 @@ public class UserDbStorage {
      * @param hbFactory Hibernate session factory.
      */
     public UserDbStorage(SessionFactory hbFactory) {
-        this.hbFactory = hbFactory;
+        super(hbFactory);
     }
 
     /**
@@ -47,25 +40,5 @@ public class UserDbStorage {
                 session -> (User) session.merge(user));
     }
 
-    /**
-     * Performs transaction: creates session, performs given operations, commits and closes.
-     *
-     * @param operations Function: operations to perform.
-     * @param <T>        Result type.
-     * @return Operation result.
-     */
-    private <T> T performTransaction(final Function<Session, T> operations) {
-        T result;
-        try (final var session = this.hbFactory.openSession()) {
-            var transaction = session.beginTransaction();
-            try {
-                result = operations.apply(session);
-                transaction.commit();
-            } catch (Exception e) {
-                transaction.rollback();
-                throw e;
-            }
-        }
-        return result;
-    }
+
 }
