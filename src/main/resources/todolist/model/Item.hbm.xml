@@ -6,6 +6,6 @@
         <property name="description" column="description"/>
         <property name="created" column="created"/>
         <property name="done" column="done"/>
-        <many-to-one name="user" column="user_id" cascade="persist"/>
+        <many-to-one name="user" column="user_id"/>
     </class>
 </hibernate-mapping>

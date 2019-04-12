@@ -5,9 +5,5 @@
         </id>
         <property name="login" column="login"/>
         <property name="password" column="password"/>
-        <set name="items" table="items" lazy="false">
-            <key column="user_id"/>
-            <one-to-many class="todolist.model.Item"/>
-        </set>
     </class>
 </hibernate-mapping>

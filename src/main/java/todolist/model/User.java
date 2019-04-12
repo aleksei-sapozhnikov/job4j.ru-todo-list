@@ -3,9 +3,6 @@ package todolist.model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * User who creates items.
  *
@@ -31,19 +28,6 @@ public class User {
      * Password.
      */
     private String password;
-    /**
-     * User's items.
-     */
-    private Set<Item> items = new HashSet<>();
-
-    //////////////////////////////////
-    // custom methods to add elements
-    //////////////////////////////////
-
-    public void addItem(Item item) {
-        this.items.add(item);
-        item.setUser(this);
-    }
 
     /////////////////////////
     // getters and setters
@@ -106,22 +90,4 @@ public class User {
         return this;
     }
 
-    /**
-     * Returns items.
-     *
-     * @return Value of items field.
-     */
-    public Set<Item> getItems() {
-        return this.items;
-    }
-
-    /**
-     * Sets items value.
-     *
-     * @param items Value to set.
-     */
-    public User setItems(Set<Item> items) {
-        this.items = items;
-        return this;
-    }
 }
