@@ -36,12 +36,12 @@
              * Path to servlet returning existing items.
              * HTTP GET method.
              */
-            const servletGetExistingItems = context + "items";
+            const servletGetExistingItems = "items";
             /**
              * Path to servlet adding new item to storage.
              * HTTP POST method.
              */
-            const servletPostAddItem = context + 'items';
+            const servletPostAddItem = 'items';
 
             /* * * * * * * *
             * PAGE VARIABLES
@@ -123,6 +123,24 @@
                 });
             }
 
+            function getSessionInfo(servletAddress, method) {
+                let result = {error: 'Could not get session info from server'};
+                $.ajax({
+                    type: method,
+                    async: false,
+                    datatype: "text/html",
+                    url: servletAddress,
+                    success: function (response) {
+                        if (response.error != null) {
+                            alert(response.error);
+                        } else {
+                            result = response;
+                        }
+                    }
+                });
+                return '<b>Logged:</b> ' + result + ' ' + '<a href="logout">logout</a>';
+            }
+
             /* * * * * * * * * * * * * * *
              * LISTENERS ON PAGE ELEMENTS
              * * * * * * * * * * * * * * */
@@ -173,6 +191,8 @@
             /* * * * * * * * * * * * * * *
              * OPERATIONS AFTER PAGE LOAD
              * * * * * * * * * * * * * * */
+            $('#session-info').html(getSessionInfo('sessionInfo', 'get'));
+
             getAllItemsFromServerAndShowResult();
 
         });
@@ -183,15 +203,20 @@
 <!--
   -- Header
   -->
-<div align="center" class="container">
-    <h3>TODO-List</h3>
-</div>
+
 
 <!--
   -- Add new task
   -->
 <div class="container" style="margin-top: 20px">
-    <div class="input-group">
+
+    <div align="center">
+        <h3>TODO-List</h3>
+    </div>
+
+    <div align="right" id="session-info"></div>
+
+    <div class="input-group" style="margin-top:20px">
         <textarea class="form-control" id="add-task-description"
                   placeholder="Enter task description. <Enter> to submit."></textarea>
         <div class="input-group-prepend">

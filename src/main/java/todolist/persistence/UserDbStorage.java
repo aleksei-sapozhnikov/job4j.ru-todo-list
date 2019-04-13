@@ -40,5 +40,15 @@ public class UserDbStorage extends AbstractDbStorage {
                 session -> (User) session.merge(user));
     }
 
+    public User getByLogin(String login) {
+        return (User) this.performTransaction(session -> {
+                    var found = session.createQuery("from User u where u.login = :login")
+                            .setParameter("login", login)
+                            .list();
+                    return found.size() > 0 ? found.get(0) : null;
+                }
+        );
+    }
+
 
 }

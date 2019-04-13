@@ -22,14 +22,14 @@ public class ItemsServlet extends HttpServlet {
     /**
      * Storage of items.
      */
-    private ItemDbStorage storage;
+    private ItemDbStorage itemStorage;
 
     /**
      * Inits servlet-used objects.
      */
     @Override
     public void init() {
-        this.storage = (ItemDbStorage) this.getServletContext()
+        this.itemStorage = (ItemDbStorage) this.getServletContext()
                 .getAttribute(ContextAttrs.ITEM_STORAGE.v());
     }
 
@@ -43,12 +43,12 @@ public class ItemsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try (var writer = resp.getWriter()) {
-            new Gson().toJson(this.storage.getAll(), writer);
+            new Gson().toJson(this.itemStorage.getAll(), writer);
         }
     }
 
     /**
-     * Takes item ro add into storage or to update, gives it to storage
+     * Takes item to add into storage or to update, gives it to storage
      * and returns storage response as Item object.
      *
      * @param req  Request object.
@@ -62,7 +62,7 @@ public class ItemsServlet extends HttpServlet {
         ) {
             var gson = new Gson();
             Item item = gson.fromJson(reader, Item.class);
-            item = this.storage.merge(item);
+            item = this.itemStorage.merge(item);
             gson.toJson(item, writer);
         }
         resp.setStatus(HttpCodes.CREATED.v());

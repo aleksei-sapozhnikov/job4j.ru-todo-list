@@ -37,6 +37,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
     public void contextInitialized(ServletContextEvent sce) {
         this.hbFactory = new Configuration().configure().buildSessionFactory();
         var ctx = sce.getServletContext();
+        ctx.setAttribute(ContextAttrs.BASE_DIR.v(), "".equals(ctx.getContextPath()) ? "/" : ctx.getContextPath() + "/");
         ctx.setAttribute(ContextAttrs.ITEM_STORAGE.v(), new ItemDbStorage(this.hbFactory));
         ctx.setAttribute(ContextAttrs.USER_STORAGE.v(), new UserDbStorage(this.hbFactory));
     }
