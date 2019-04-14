@@ -16,7 +16,7 @@
 
     <servlet>
         <servlet-name>SessionInfoServlet</servlet-name>
-        <servlet-class>todolist.servlet.SessionInfoServlet</servlet-class>
+        <servlet-class>todolist.servlet.InformationServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>

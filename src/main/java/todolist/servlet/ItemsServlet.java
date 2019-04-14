@@ -3,7 +3,9 @@ package todolist.servlet;
 import com.google.gson.Gson;
 import todolist.constants.ContextAttrs;
 import todolist.constants.HttpCodes;
-import todolist.model.Item;
+import todolist.model.FrontItem;
+import todolist.model.Mapper;
+import todolist.model.User;
 import todolist.persistence.ItemDbStorage;
 
 import javax.servlet.http.HttpServlet;
@@ -23,6 +25,12 @@ public class ItemsServlet extends HttpServlet {
      * Storage of items.
      */
     private ItemDbStorage itemStorage;
+    /**
+     * JSON parser.
+     */
+    private final Gson gson = new Gson();
+
+    private final Mapper mapper = new Mapper();
 
     /**
      * Inits servlet-used objects.
@@ -42,8 +50,11 @@ public class ItemsServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        var session = req.getSession();
+        var id = (long) session.getAttribute("loggedUserId");
         try (var writer = resp.getWriter()) {
-            new Gson().toJson(this.itemStorage.getAll(), writer);
+            var items = this.mapper.itemToFrontItem(this.itemStorage.getForUser(id));
+            this.gson.toJson(items, writer);
         }
     }
 
@@ -60,10 +71,10 @@ public class ItemsServlet extends HttpServlet {
         try (var reader = req.getReader();
              var writer = resp.getWriter()
         ) {
-            var gson = new Gson();
-            Item item = gson.fromJson(reader, Item.class);
+            var front = this.gson.fromJson(reader, FrontItem.class);
+            var item = this.mapper.frontItemToItem(front, (User) req.getSession().getAttribute("loggedUser"));
             item = this.itemStorage.merge(item);
-            gson.toJson(item, writer);
+            this.gson.toJson(this.mapper.itemToFrontItem(item), writer);
         }
         resp.setStatus(HttpCodes.CREATED.v());
     }

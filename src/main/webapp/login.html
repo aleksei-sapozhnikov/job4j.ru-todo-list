@@ -23,11 +23,50 @@
     <script src="js/utility.js"></script>
 
 </head>
+
+<script>
+    function getUrlParameter(sParam) {
+        let sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+    }
+
+
+    $(function () {
+        let message = getUrlParameter("message");
+        if (message !== undefined && message !== "") {
+            $('#message').html(
+                '<div class="alert alert-primary alert-dismissible fade show" role="alert">'
+                + message
+                + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
+                + '<span aria-hidden="true">&times;</span>'
+                + '</button>'
+                + '</div>'
+            );
+        }
+    });
+</script>
+
 <body>
 
 <div class="container" style="text-align:center">
 
     <h3>Login</h3>
+
+    <div align="left">
+        <div id="message"></div>
+        <p>Please log in or create new user.</p>
+        <p>If login doesn't exist, a new user with given login and password will be created.</p>
+    </div>
 
     <form action="login" method="post">
         <label>

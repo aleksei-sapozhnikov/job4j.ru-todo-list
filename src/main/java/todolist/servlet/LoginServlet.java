@@ -38,20 +38,30 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         var login = req.getParameter("login");
         var password = req.getParameter("password");
-        var msg = String.format("success=user-%s-logged-in", login);
+        var msg = String.format("User logged in: %s", login);
         var user = this.userStorage.getByLogin(login);
         if (user == null) {
             user = new User().setLogin(login).setPassword(password);
             user = this.userStorage.merge(user);
-            msg = String.format("success=user-%s-created", login);
+            msg = String.format("User created: %s", login);
         }
         if (user.getPassword().equals(password)) {
-            req.getSession().setAttribute("loggedUserId", user.getId());
-            req.getSession().setAttribute("loggedUserLogin", user.getLogin());
-            resp.sendRedirect(req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v()) + "index.html" + "?" + msg);
+            var session = req.getSession();
+            session.setAttribute("loggedUser", user);
+            session.setAttribute("loggedUserId", user.getId());
+            session.setAttribute("loggedUserLogin", user.getLogin());
+            session.setAttribute("message", msg);
+            resp.sendRedirect(String.format("%s",
+                    req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v())
+            ));
         } else {
-            msg = "error=wrong-password";
-            resp.sendRedirect(req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v()) + "login.html" + "?" + msg);
+            msg = "Error: wrong password";
+            resp.sendRedirect(new StringBuilder()
+                    .append(req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v()))
+                    .append("login.html")
+                    .append("?").append("message=").append(msg)
+                    .toString()
+            );
         }
     }
 }

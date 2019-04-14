@@ -23,6 +23,13 @@
     <script src="js/utility.js"></script>
 
     <script>
+        class Info {
+            loggedUser;
+            message;
+        }
+    </script>
+
+    <script>
         $(function () {
 
             /* * * * * * *
@@ -123,8 +130,8 @@
                 });
             }
 
-            function getSessionInfo(servletAddress, method) {
-                let result = {error: 'Could not get session info from server'};
+            function getInfo(servletAddress, method) {
+                let result = {error: 'Could not get info from server'};
                 $.ajax({
                     type: method,
                     async: false,
@@ -134,11 +141,11 @@
                         if (response.error != null) {
                             alert(response.error);
                         } else {
-                            result = response;
+                            result = Object.setPrototypeOf(JSON.parse(response), Info.prototype);
                         }
                     }
                 });
-                return '<b>Logged:</b> ' + result + ' ' + '<a href="logout">logout</a>';
+                return result;
             }
 
             /* * * * * * * * * * * * * * *
@@ -191,11 +198,25 @@
             /* * * * * * * * * * * * * * *
              * OPERATIONS AFTER PAGE LOAD
              * * * * * * * * * * * * * * */
-            $('#session-info').html(getSessionInfo('sessionInfo', 'get'));
+            let info = getInfo('sessionInfo', 'get');
+            $('#session-info').html(
+                '<b>Logged: </b>' + info.loggedUser
+            );
+            if (info.message !== "") {
+                $('#message').html(
+                    '<div class="alert alert-primary alert-dismissible fade show" role="alert">'
+                    + info.message
+                    + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
+                    + '<span aria-hidden="true">&times;</span>'
+                    + '</button>'
+                    + '</div>'
+                );
+            }
 
             getAllItemsFromServerAndShowResult();
 
-        });
+        })
+        ;
     </script>
 </head>
 <body>
@@ -214,7 +235,15 @@
         <h3>TODO-List</h3>
     </div>
 
-    <div align="right" id="session-info"></div>
+    <div id="message"></div>
+
+    <div align="right">
+        <form action="logout" id="logout-form" method="post">
+            <span id="session-info"></span>
+            <a href="javascript:{}"
+               onclick="document.getElementById('logout-form').submit(); return false;">logout</a>
+        </form>
+    </div>
 
     <div class="input-group" style="margin-top:20px">
         <textarea class="form-control" id="add-task-description"

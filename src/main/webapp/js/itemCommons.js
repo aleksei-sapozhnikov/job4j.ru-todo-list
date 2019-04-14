@@ -1,21 +1,31 @@
-/*  * * * * * * * * * * *
-* COMMON ITEMS FUNCTIONS
-* * * * * * * * * * * * */
+//////////
+// ITEM
+//////////
 
-/**
- * Item object constructor.
- *
- * @param id Item id.
- * @param description Item description.
- * @param created Item creation time (milliseconds)
- * @param done Boolean flag: done/notDone/
- * @constructor
- */
-function Item(id, description, created, done) {
-    this.id = id;
-    this.description = description;
-    this.created = created;
-    this.done = done;
+class Item {
+    /** Id */
+    id;
+    /** Description */
+    description;
+    /** When it was created */
+    created;
+    /** Done or not? */
+    done;
+
+    /**
+     * Item object constructor.
+     *
+     * @param {number} id Item id.
+     * @param {string} description Item description.
+     * @param {number} created Item creation time (milliseconds)
+     * @param {boolean} done Boolean flag: done / notDone.
+     */
+    constructor(id, description, created, done) {
+        this.id = id;
+        this.description = description;
+        this.created = created;
+        this.done = done;
+    }
 }
 
 /**
@@ -24,8 +34,8 @@ function Item(id, description, created, done) {
  * First: undone item is less then done item.
  * Second: item created earlier is less than latter item.
  *
- * @param first First item.
- * @param second Second item.
+ * @param {Item} first First item.
+ * @param {Item} second Second item.
  * @return {number} Positive if first > second, negative otherwise.
  */
 function compareItems(first, second) {
@@ -44,9 +54,9 @@ function compareItems(first, second) {
  * Replaces item in array to replacer, if item's id is equal to replacer's id.
  * If not found item with needed id, then adds replacer to array.
  *
- * @param itemsArray Array of items.
- * @param replacer Item which will replace existing item or will be added to array.
- * @return Array of items with replaced or added item.
+ * @param {Array} itemsArray Array of items.
+ * @param {Item} replacer Item which will replace existing item or will be added to array.
+ * @return {Array}Array of items with replaced or added item.
  */
 function replaceOrAddItemIntoArray(itemsArray, replacer) {
     let iOld = itemsArray.findIndex(function (elt) {

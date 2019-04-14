@@ -2,6 +2,7 @@ package todolist.servlet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import todolist.constants.ContextAttrs;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,9 +25,14 @@ public class LogoutServlet extends HttpServlet {
     private static final Logger LOG = LogManager.getLogger(LogoutServlet.class);
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.getSession().invalidate();
-        var msg = "success=logged out";
-        resp.sendRedirect("login.html" + "?" + msg);
+        var msg = "Logged out";
+        resp.sendRedirect(new StringBuilder()
+                .append(req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v()))
+                .append("login.html")
+                .append("?").append("message=").append(msg)
+                .toString()
+        );
     }
 }
