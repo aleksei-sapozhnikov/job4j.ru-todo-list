@@ -22,7 +22,7 @@ public class Item {
     /**
      * Item id.
      */
-    private int id;
+    private long id;
     /**
      * Item description.
      */
@@ -91,7 +91,7 @@ public class Item {
      *
      * @return Value of id field.
      */
-    public int getId() {
+    public long getId() {
         return this.id;
     }
 
@@ -100,8 +100,9 @@ public class Item {
      *
      * @param id Value to set.
      */
-    public void setId(int id) {
+    public Item setId(long id) {
         this.id = id;
+        return this;
     }
 
     /**

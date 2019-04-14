@@ -24,7 +24,7 @@ public class IntegralStorageTest {
      */
     private final SessionFactory hbFactory = new Configuration().configure().buildSessionFactory();
 
-    private Item createItem(int id, String description, long created, boolean done, User user) {
+    private Item createItem(long id, String description, long created, boolean done, User user) {
         var item = new Item();
         item.setId(id);
         item.setDescription(description);
