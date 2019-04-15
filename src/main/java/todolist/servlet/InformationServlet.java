@@ -3,6 +3,7 @@ package todolist.servlet;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import todolist.constants.ContextAttrs;
 import todolist.model.FrontInfo;
 import todolist.model.User;
 
@@ -31,9 +32,9 @@ public class InformationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         var session = req.getSession();
-        var user = (User) session.getAttribute("loggedUser");
-        var message = (String) session.getAttribute("message");
-        session.setAttribute("message", "");
+        var user = (User) session.getAttribute(ContextAttrs.LOGGED_USER.v());
+        var message = (String) session.getAttribute(ContextAttrs.MESSAGE.v());
+        session.setAttribute(ContextAttrs.MESSAGE.v(), "");
         var info = new FrontInfo(user.getLogin(), message);
         try (var writer = resp.getWriter()) {
             this.gson.toJson(info, writer);

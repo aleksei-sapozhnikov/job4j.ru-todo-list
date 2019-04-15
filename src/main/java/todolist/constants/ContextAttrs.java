@@ -10,8 +10,17 @@ package todolist.constants;
 public enum ContextAttrs {
     BASE_DIR("baseDit"),
 
+    LOGGED_USER("loggedUser"),
+
+    MESSAGE("message"),
+
     ITEM_STORAGE("itemStorage"),
-    USER_STORAGE("userStorage");
+    USER_STORAGE("userStorage"),
+
+    PAGE_LOGIN("login.html"),
+
+    PRM_LOGIN("login"),
+    PRM_PASSWORD("password");
 
     /**
      * Value holder.

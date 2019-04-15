@@ -28,27 +28,14 @@ public class UserDbStorage extends AbstractDbStorage {
         super(hbFactory);
     }
 
-    /**
-     * If id of given user found in database, updates user.
-     * Otherwise adds given user to database with id given by database.
-     *
-     * @param user User to store or to use as update.
-     * @return User object stored in database, with id given by database.
-     */
-    public User merge(User user) {
-        return this.performTransaction(
-                session -> (User) session.merge(user));
+    public User getOrAdd(User user) {
+        return this.performTransaction(session -> {
+            User result = session.get(User.class, user.getLogin());
+            if (result == null) {
+                result = user;
+                session.persist(result);
+            }
+            return result;
+        });
     }
-
-    public User getByLogin(String login) {
-        return (User) this.performTransaction(session -> {
-                    var found = session.createQuery("from User u where u.login = :login")
-                            .setParameter("login", login)
-                            .list();
-                    return found.size() > 0 ? found.get(0) : null;
-                }
-        );
-    }
-
-
 }

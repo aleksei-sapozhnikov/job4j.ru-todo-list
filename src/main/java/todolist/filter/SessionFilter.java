@@ -35,8 +35,9 @@ public class SessionFilter implements Filter {
         var resp = (HttpServletResponse) response;
         var session = req.getSession();
         var uri = req.getRequestURI();
-        var pass = (session != null && session.getAttribute("loggedUserId") != null)
-                || (uri.endsWith("/login.html") || uri.endsWith("/login"));
+        var pass = (session != null && session.getAttribute("loggedUser") != null)
+                || uri.endsWith("/login.html")
+                || uri.endsWith("/login");
         if (pass) {
             chain.doFilter(req, resp);
         } else {

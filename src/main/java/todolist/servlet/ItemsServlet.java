@@ -51,9 +51,10 @@ public class ItemsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         var session = req.getSession();
-        var id = (long) session.getAttribute("loggedUserId");
+        var user = (User) session.getAttribute(ContextAttrs.LOGGED_USER.v());
+        var login = user.getLogin();
         try (var writer = resp.getWriter()) {
-            var items = this.mapper.itemToFrontItem(this.itemStorage.getForUser(id));
+            var items = this.mapper.itemToFrontItem(this.itemStorage.getForUser(login));
             this.gson.toJson(items, writer);
         }
     }
@@ -72,7 +73,7 @@ public class ItemsServlet extends HttpServlet {
              var writer = resp.getWriter()
         ) {
             var front = this.gson.fromJson(reader, FrontItem.class);
-            var item = this.mapper.frontItemToItem(front, (User) req.getSession().getAttribute("loggedUser"));
+            var item = this.mapper.frontItemToItem(front, (User) req.getSession().getAttribute(ContextAttrs.LOGGED_USER.v()));
             item = this.itemStorage.merge(item);
             this.gson.toJson(this.mapper.itemToFrontItem(item), writer);
         }

@@ -68,10 +68,10 @@ public class ItemDbStorage extends AbstractDbStorage {
      * @return List of Item objects.
      */
     @SuppressWarnings("unchecked")
-    public List<Item> getForUser(long userId) {
+    public List<Item> getForUser(String login) {
         return this.performTransaction(
-                session -> session.createQuery("from Item i where i.user.id = :userId")
-                        .setParameter("userId", userId)
+                session -> session.createQuery("from Item i where i.user.login = :login")
+                        .setParameter("login", login)
                         .list());
     }
 

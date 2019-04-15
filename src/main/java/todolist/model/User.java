@@ -17,10 +17,6 @@ public class User {
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(User.class);
     /**
-     * Unique id.
-     */
-    private long id;
-    /**
      * Login.
      */
     private String login;
@@ -32,25 +28,6 @@ public class User {
     /////////////////////////
     // getters and setters
     /////////////////////////
-
-    /**
-     * Returns id.
-     *
-     * @return Value of id field.
-     */
-    public long getId() {
-        return this.id;
-    }
-
-    /**
-     * Sets id value.
-     *
-     * @param id Value to set.
-     */
-    public User setId(long id) {
-        this.id = id;
-        return this;
-    }
 
     /**
      * Returns login.

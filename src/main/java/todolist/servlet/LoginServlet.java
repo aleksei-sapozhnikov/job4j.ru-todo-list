@@ -26,42 +26,47 @@ public class LoginServlet extends HttpServlet {
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(LoginServlet.class);
 
+    private String baseDir;
+
     private UserDbStorage userStorage;
+
 
     @Override
     public void init() throws ServletException {
         var ctx = this.getServletContext();
+        this.baseDir = (String) this.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v());
         this.userStorage = (UserDbStorage) ctx.getAttribute(ContextAttrs.USER_STORAGE.v());
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        var login = req.getParameter("login");
-        var password = req.getParameter("password");
-        var msg = String.format("User logged in: %s", login);
-        var user = this.userStorage.getByLogin(login);
-        if (user == null) {
-            user = new User().setLogin(login).setPassword(password);
-            user = this.userStorage.merge(user);
-            msg = String.format("User created: %s", login);
-        }
+        var login = req.getParameter(ContextAttrs.PRM_LOGIN.v());
+        var password = req.getParameter(ContextAttrs.PRM_PASSWORD.v());
+        var user = this.userStorage.getOrAdd(new User().setLogin(login).setPassword(password));
         if (user.getPassword().equals(password)) {
-            var session = req.getSession();
-            session.setAttribute("loggedUser", user);
-            session.setAttribute("loggedUserId", user.getId());
-            session.setAttribute("loggedUserLogin", user.getLogin());
-            session.setAttribute("message", msg);
-            resp.sendRedirect(String.format("%s",
-                    req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v())
-            ));
+            this.attachAndPass(req, resp, login, user);
         } else {
-            msg = "Error: wrong password";
-            resp.sendRedirect(new StringBuilder()
-                    .append(req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v()))
-                    .append("login.html")
-                    .append("?").append("message=").append(msg)
-                    .toString()
-            );
+            this.redirectWithError(resp);
         }
+    }
+
+    private void redirectWithError(HttpServletResponse resp) throws IOException, ServletException {
+        var msg = "Error: wrong password";
+        resp.sendRedirect(new StringBuilder()
+                .append(this.baseDir)
+                .append(ContextAttrs.PAGE_LOGIN.v())
+                .append("?").append(ContextAttrs.MESSAGE.v()).append("=").append(msg)
+                .toString()
+        );
+    }
+
+    private void attachAndPass(HttpServletRequest req, HttpServletResponse resp, String login, User user) throws IOException {
+        var msg = String.format("User logged in: %s", login);
+        var session = req.getSession();
+        session.setAttribute(ContextAttrs.LOGGED_USER.v(), user);
+        session.setAttribute(ContextAttrs.MESSAGE.v(), msg);
+        resp.sendRedirect(String.format("%s",
+                req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v())
+        ));
     }
 }

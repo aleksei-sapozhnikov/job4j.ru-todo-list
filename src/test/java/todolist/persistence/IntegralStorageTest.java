@@ -54,7 +54,7 @@ public class IntegralStorageTest {
     @Test
     public void whenMergeItemWithNewIdThenItemAdded() {
         this.doIntegralTestWithRollback((itemStorage, userStorage) -> {
-            var user = userStorage.merge(new User().setLogin("default").setPassword("default"));
+            var user = userStorage.getOrAdd(new User().setLogin("default").setPassword("default"));
             var toAdd = this.createItem("item one", 123, true, user);
             var added = itemStorage.merge(toAdd);
             assertEquals(added.getDescription(), toAdd.getDescription());
@@ -67,7 +67,7 @@ public class IntegralStorageTest {
     @Test
     public void whenMergeItemWithExistingIdThenItemUpdated() {
         this.doIntegralTestWithRollback((itemStorage, userStorage) -> {
-            var user = userStorage.merge(new User().setLogin("default").setPassword("default"));
+            var user = userStorage.getOrAdd(new User().setLogin("default").setPassword("default"));
             var toAdd = this.createItem("item", 123, true, user);
             var added = itemStorage.merge(toAdd);
             var toUpdate = this.createItem(added.getId(), "updated item", 567, false, user);
@@ -83,7 +83,7 @@ public class IntegralStorageTest {
     @Test
     public void whenSearchItemThenItemFound() {
         this.doIntegralTestWithRollback((itemStorage, userStorage) -> {
-            var user = userStorage.merge(new User().setLogin("default").setPassword("default"));
+            var user = userStorage.getOrAdd(new User().setLogin("default").setPassword("default"));
             var toAdd = this.createItem("item", 123, true, user);
             var added = itemStorage.merge(toAdd);
             itemStorage.merge(this.createItem("item2", 234, false, user));
@@ -103,7 +103,7 @@ public class IntegralStorageTest {
     @Test
     public void whenGetAllThenAllItemsReturned() {
         this.doIntegralTestWithRollback((itemStorage, userStorage) -> {
-            var user = userStorage.merge(new User().setLogin("default").setPassword("default"));
+            var user = userStorage.getOrAdd(new User().setLogin("default").setPassword("default"));
             itemStorage.merge(this.createItem("item2", 234, false, user));
             itemStorage.merge(this.createItem("item3", 456, true, user));
             itemStorage.merge(this.createItem("item4", 987, false, user));
@@ -131,10 +131,10 @@ public class IntegralStorageTest {
             var itemStorage = new ItemDbStorage(factory);
             var userStorage = new UserDbStorage(factory);
             // add users
-            var userOne = new User().setId(1).setLogin("login one").setPassword("password one");
-            var userTwo = new User().setId(2).setLogin("login two").setPassword("password two");
-            userOne = userStorage.merge(userOne);
-            userTwo = userStorage.merge(userTwo);
+            var userOne = new User().setLogin("login one").setPassword("password one");
+            var userTwo = new User().setLogin("login two").setPassword("password two");
+            userOne = userStorage.getOrAdd(userOne);
+            userTwo = userStorage.getOrAdd(userTwo);
             // add items
             itemStorage.merge(this.createItem("item2 user one", 234, false, userOne));
             itemStorage.merge(this.createItem("item3 user two", 456, true, userTwo));
@@ -142,8 +142,8 @@ public class IntegralStorageTest {
             itemStorage.merge(this.createItem("item5 user one", 247, false, userOne));
             itemStorage.merge(this.createItem("item6 user two", 754, false, userTwo));
             // get for users
-            var forUserOne = itemStorage.getForUser(userOne.getId());
-            var forUserTwo = itemStorage.getForUser(userTwo.getId());
+            var forUserOne = itemStorage.getForUser(userOne.getLogin());
+            var forUserTwo = itemStorage.getForUser(userTwo.getLogin());
             assertEquals(2, forUserOne.size());
             assertEquals(3, forUserTwo.size());
             // check values for userOne

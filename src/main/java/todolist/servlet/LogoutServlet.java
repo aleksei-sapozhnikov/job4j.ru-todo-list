@@ -30,8 +30,8 @@ public class LogoutServlet extends HttpServlet {
         var msg = "Logged out";
         resp.sendRedirect(new StringBuilder()
                 .append(req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v()))
-                .append("login.html")
-                .append("?").append("message=").append(msg)
+                .append(ContextAttrs.PAGE_LOGIN.v())
+                .append("?").append(ContextAttrs.MESSAGE.v()).append("=").append(msg)
                 .toString()
         );
     }
