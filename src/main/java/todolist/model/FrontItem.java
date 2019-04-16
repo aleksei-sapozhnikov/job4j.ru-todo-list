@@ -64,8 +64,12 @@ public class FrontItem {
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         FrontItem frontItem = (FrontItem) o;
         return id == frontItem.id;
     }
