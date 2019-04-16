@@ -1,10 +1,12 @@
 package todolist.listener;
 
+import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import todolist.constants.ContextAttrs;
+import todolist.model.Mapper;
 import todolist.persistence.ItemDbStorage;
 import todolist.persistence.UserDbStorage;
 
@@ -40,6 +42,8 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
         ctx.setAttribute(ContextAttrs.BASE_DIR.v(), "".equals(ctx.getContextPath()) ? "/" : ctx.getContextPath() + "/");
         ctx.setAttribute(ContextAttrs.ITEM_STORAGE.v(), new ItemDbStorage(this.hbFactory));
         ctx.setAttribute(ContextAttrs.USER_STORAGE.v(), new UserDbStorage(this.hbFactory));
+        ctx.setAttribute(ContextAttrs.JSON_PARSER.v(), new Gson());
+        ctx.setAttribute(ContextAttrs.MAPPER.v(), new Mapper());
     }
 
     /**

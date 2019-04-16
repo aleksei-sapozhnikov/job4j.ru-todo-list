@@ -3,8 +3,11 @@ package todolist.model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Objects;
+
 /**
- * Frontend item object (to send by JSON).
+ * Frontend item object.
+ * To send as JSON.
  *
  * @author Aleksei Sapozhnikov (vermucht@gmail.com)
  * @version 0.1
@@ -34,12 +37,54 @@ public class FrontItem {
      */
     private final boolean done;
 
+    /**
+     * Constructor.
+     *
+     * @param id          Item id.
+     * @param description Item description.
+     * @param created     Time of creation (milliseconds).
+     * @param done        Flag 'done'/'not done'.
+     */
     public FrontItem(long id, String description, long created, boolean done) {
         this.id = id;
         this.description = description;
         this.created = created;
         this.done = done;
     }
+
+    /////////////////////
+    // equals, hashcode
+    /////////////////////
+
+    /**
+     * Override Object.equals().
+     *
+     * @param o Other object.
+     * @return <tt>true</tt> if equal, <tt>false if not</tt>
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FrontItem frontItem = (FrontItem) o;
+        return id == frontItem.id;
+    }
+
+
+    /**
+     * Override Object.hashcode().
+     *
+     * @return Object hashcode.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+
+    ////////////////////////
+    // getters and setters
+    ////////////////////////
 
     /**
      * Returns id.

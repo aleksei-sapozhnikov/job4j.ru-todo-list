@@ -17,10 +17,15 @@ public enum ContextAttrs {
     ITEM_STORAGE("itemStorage"),
     USER_STORAGE("userStorage"),
 
-    PAGE_LOGIN("login.html"),
+    ADDR_LOGIN("login"),
+
+    VIEW_LOGIN("/login.html"),
 
     PRM_LOGIN("login"),
-    PRM_PASSWORD("password");
+    PRM_PASSWORD("password"),
+
+    JSON_PARSER("jsonParser"),
+    MAPPER("mapper");
 
     /**
      * Value holder.

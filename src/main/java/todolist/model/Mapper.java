@@ -20,6 +20,12 @@ public class Mapper {
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(Mapper.class);
 
+    /**
+     * Contains logic to convert single backend-item to frontend-item.
+     *
+     * @param item Backend-item.
+     * @return FrontEnd-item.
+     */
     private static FrontItem staticItemToFrontItem(Item item) {
         return new FrontItem(
                 item.getId(),
@@ -29,6 +35,13 @@ public class Mapper {
         );
     }
 
+    /**
+     * Contains logic to convert frontend-item to backend-item.
+     *
+     * @param front Frontend-item.
+     * @param user  User who created the item.
+     * @return Backend-item.
+     */
     private static Item staticFrontItemToItem(FrontItem front, User user) {
         var item = new Item();
         item.setId(front.getId());
@@ -39,16 +52,35 @@ public class Mapper {
         return item;
     }
 
+    /**
+     * Converts list of backend-item objects into list of frontend-item objects.
+     *
+     * @param items List of backend-items.
+     * @return List of frontend-items.
+     */
     public List<FrontItem> itemToFrontItem(List<Item> items) {
         return items.stream()
                 .map(Mapper::staticItemToFrontItem)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Converts single backend-item into frontend-item.
+     *
+     * @param item Backend-item.
+     * @return Frontend-item.
+     */
     public FrontItem itemToFrontItem(Item item) {
         return staticItemToFrontItem(item);
     }
 
+    /**
+     * Converts single frontend-item object to backend-item object.
+     *
+     * @param front Frontend-item.
+     * @param user  User who created the item.
+     * @return Backend item.
+     */
     public Item frontItemToItem(FrontItem front, User user) {
         return staticFrontItemToItem(front, user);
     }

@@ -17,11 +17,21 @@ public class FrontInfo {
      */
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(FrontInfo.class);
-
+    /**
+     * Current logged user info.
+     */
     private final String loggedUser;
-
+    /**
+     * Message about current operation.
+     */
     private final String message;
 
+    /**
+     * Constructor.
+     *
+     * @param loggedUser Current logged user info.
+     * @param message    Message about current operation.
+     */
     public FrontInfo(String loggedUser, String message) {
         this.loggedUser = loggedUser;
         this.message = message;

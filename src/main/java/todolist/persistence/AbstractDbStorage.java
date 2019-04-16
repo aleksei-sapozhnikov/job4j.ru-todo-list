@@ -30,7 +30,7 @@ public abstract class AbstractDbStorage {
      *
      * @param hbFactory Hibernate session factory.
      */
-    public AbstractDbStorage(SessionFactory hbFactory) {
+    protected AbstractDbStorage(SessionFactory hbFactory) {
         this.hbFactory = hbFactory;
     }
 

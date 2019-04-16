@@ -7,7 +7,6 @@ import todolist.constants.ContextAttrs;
 import todolist.model.FrontInfo;
 import todolist.model.User;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,18 +25,36 @@ public class InformationServlet extends HttpServlet {
      */
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(InformationServlet.class);
+    /**
+     * Json parser.
+     */
+    private Gson jsonParser;
 
-    private final Gson gson = new Gson();
-
+    /**
+     * Inits servlet-used objects.
+     */
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void init() {
+        var ctx = this.getServletContext();
+        this.jsonParser = (Gson) ctx.getAttribute(ContextAttrs.JSON_PARSER.v());
+    }
+
+    /**
+     * Returns JSON object with information stored in the current http session.
+     *
+     * @param req  Request object.
+     * @param resp Response object.
+     * @throws IOException In case of problems.
+     */
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         var session = req.getSession();
         var user = (User) session.getAttribute(ContextAttrs.LOGGED_USER.v());
         var message = (String) session.getAttribute(ContextAttrs.MESSAGE.v());
         session.setAttribute(ContextAttrs.MESSAGE.v(), "");
         var info = new FrontInfo(user.getLogin(), message);
         try (var writer = resp.getWriter()) {
-            this.gson.toJson(info, writer);
+            this.jsonParser.toJson(info, writer);
         }
     }
 }

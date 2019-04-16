@@ -8,9 +8,6 @@ package todolist.constants;
  * @since 0.1
  */
 public enum HttpCodes {
-    /**
-     * HTTP status codes.
-     */
     CREATED(201);
 
     /**

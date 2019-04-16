@@ -28,17 +28,21 @@ public class ItemsServlet extends HttpServlet {
     /**
      * JSON parser.
      */
-    private final Gson gson = new Gson();
-
-    private final Mapper mapper = new Mapper();
+    private Gson jsonParser;
+    /**
+     * Converts objects one into another.
+     */
+    private Mapper mapper;
 
     /**
      * Inits servlet-used objects.
      */
     @Override
     public void init() {
-        this.itemStorage = (ItemDbStorage) this.getServletContext()
-                .getAttribute(ContextAttrs.ITEM_STORAGE.v());
+        var ctx = this.getServletContext();
+        this.itemStorage = (ItemDbStorage) ctx.getAttribute(ContextAttrs.ITEM_STORAGE.v());
+        this.jsonParser = (Gson) ctx.getAttribute(ContextAttrs.JSON_PARSER.v());
+        this.mapper = (Mapper) ctx.getAttribute(ContextAttrs.MAPPER.v());
     }
 
     /**
@@ -55,7 +59,7 @@ public class ItemsServlet extends HttpServlet {
         var login = user.getLogin();
         try (var writer = resp.getWriter()) {
             var items = this.mapper.itemToFrontItem(this.itemStorage.getForUser(login));
-            this.gson.toJson(items, writer);
+            this.jsonParser.toJson(items, writer);
         }
     }
 
@@ -72,10 +76,11 @@ public class ItemsServlet extends HttpServlet {
         try (var reader = req.getReader();
              var writer = resp.getWriter()
         ) {
-            var front = this.gson.fromJson(reader, FrontItem.class);
-            var item = this.mapper.frontItemToItem(front, (User) req.getSession().getAttribute(ContextAttrs.LOGGED_USER.v()));
+            var front = this.jsonParser.fromJson(reader, FrontItem.class);
+            var user = (User) req.getSession().getAttribute(ContextAttrs.LOGGED_USER.v());
+            var item = this.mapper.frontItemToItem(front, user);
             item = this.itemStorage.merge(item);
-            this.gson.toJson(this.mapper.itemToFrontItem(item), writer);
+            this.jsonParser.toJson(this.mapper.itemToFrontItem(item), writer);
         }
         resp.setStatus(HttpCodes.CREATED.v());
     }

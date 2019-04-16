@@ -23,14 +23,26 @@ public class LogoutServlet extends HttpServlet {
      */
     @SuppressWarnings("unused")
     private static final Logger LOG = LogManager.getLogger(LogoutServlet.class);
+    /**
+     * Web-app root address.
+     */
+    private String baseDir;
 
+    /**
+     * Invalidates current session and sends redirect to login page with message.
+     *
+     * @param req  Request object.
+     * @param resp Response object.
+     * @throws ServletException In case of problems.
+     * @throws IOException      If problems occur.
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.getSession().invalidate();
         var msg = "Logged out";
         resp.sendRedirect(new StringBuilder()
-                .append(req.getServletContext().getAttribute(ContextAttrs.BASE_DIR.v()))
-                .append(ContextAttrs.PAGE_LOGIN.v())
+                .append(this.baseDir)
+                .append(ContextAttrs.ADDR_LOGIN.v())
                 .append("?").append(ContextAttrs.MESSAGE.v()).append("=").append(msg)
                 .toString()
         );
